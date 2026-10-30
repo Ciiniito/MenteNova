@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/panel :: head('Eliminar psicólogo')}"></head>
+<body class="mn-panel mn-psicologos">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('psicologos')}"></aside>
+    <main class="mn-main psi-main">
+        <div class="psi-page-top">
+            <header th:replace="~{fragments/panel :: topbar('Eliminar psicólogo', 'Revisa el registro antes de confirmar la eliminación.')}"></header>
+            <span class="psi-context"><span class="psi-dot"></span> Equipo clínico</span>
+        </div>
+        <a th:href="@{/psicologos}" class="psi-back"><i class="bi bi-arrow-left" aria-hidden="true"></i> Volver al directorio</a>
+        <section class="psi-delete" aria-labelledby="titulo-eliminar">
+            <span class="psi-delete__icon"><i class="bi bi-trash3" aria-hidden="true"></i></span>
+            <p class="psi-eyebrow">CONFIRMAR ELIMINACIÓN</p>
+            <h2 id="titulo-eliminar">¿Eliminar a este profesional?</h2>
+            <p>Se eliminarán su ficha de psicólogo y su cuenta de acceso a MenteNova. Esta acción es permanente.</p>
+            <dl class="psi-delete__details">
+                <div><dt>Profesional</dt><dd th:text="${psicologo.usuario.nombres + ' ' + psicologo.usuario.apellidos}"></dd></div>
+                <div><dt>Correo</dt><dd th:text="${psicologo.usuario.correo}"></dd></div>
+                <div><dt>Colegiatura</dt><dd th:text="${psicologo.numeroColegiatura}"></dd></div>
+            </dl>
+            <div class="psi-alert psi-alert--error">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                <span>Si tiene citas, horarios u otros registros vinculados que impidan eliminarlo, se conservará el registro completo. Puedes desactivar su cuenta desde Editar.</span>
+            </div>
+            <form th:action="@{/psicologos/{id}/eliminar(id=${psicologo.id})}" method="post" class="psi-delete__actions">
+                <a th:href="@{/psicologos}" class="psi-button psi-button--secondary">Cancelar</a>
+                <button type="submit" class="psi-button psi-button--danger">
+                    <i class="bi bi-trash3" aria-hidden="true"></i> Sí, eliminar psicólogo
+                </button>
+            </form>
+        </section>
+    </main>
+</div>
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body>
+</html>

@@ -13,6 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +36,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.requireCsrfProtectionMatcher(
+                 new AndRequestMatcher(
+                CsrfFilter.DEFAULT_CSRF_MATCHER,
+                new AntPathRequestMatcher("/psicologos/**")
+                )
+                ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/registro/**", "/css/**", "/images/**", "/error").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
