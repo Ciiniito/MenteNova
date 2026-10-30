@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Registrarse - MenteNova</title>
+    <link th:href="@{/css/login.css}" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+          crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
+</head>
+<body>
+<div class="login-container min-vh-100 d-flex flex-column flex-md-row">
+    <!-- Izquierda: Logo y descripción del centro -->
+    <div class="login-brand d-none d-md-flex flex-column justify-content-center align-items-center p-4 p-md-5 text-white">
+        <img th:src="@{/images/logo-MenteNova.jpg}"
+             alt="Logo MenteNova"
+             class="logo-img mb-3"/>
+        <h1 class="fw-bold mb-2">MenteNova</h1>
+        <p class="mb-0 opacity-90">
+            Centro psicológico dedicado a la atención y orientación de niños, adolescentes y adultos,
+            mediante servicios presenciales y virtuales previa cita.
+        </p>
+    </div>
+
+    <!-- Derecha: Formulario de registro -->
+    <div class="login-form flex-grow-1 d-flex justify-content-center align-items-center p-4">
+        <div class="auth-card w-100" style="max-width: 420px;">
+            <div class="card-header text-center bg-white border-0 pb-4">
+                <h2 class="h4 mb-0">Crear cuenta</h2>
+                <p class="text-muted small">Regístrese para agendar citas en MenteNova</p>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Mensaje de éxito previo -->
+                <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${exito}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Errores de validación globales -->
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${#fields.globalError()}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+
+                <form th:action="@{/registro}" method="post" th:object="${registroDTO}">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="nombres" class="form-label">Nombres</label>
+                            <input type="text"
+                                   id="nombres"
+                                   name="nombres"
+                                   class="form-control"
+                                   th:field="*{nombres}"
+                                   placeholder="Juan Carlos"
+                                   required
+                                   autofocus/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="apellidos" class="form-label">Apellidos</label>
+                            <input type="text"
+                                   id="apellidos"
+                                   name="apellidos"
+                                   class="form-control"
+                                   th:field="*{apellidos}"
+                                   placeholder="Pérez Gómez"
+                                   required/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="correo" class="form-label">Correo electrónico</label>
+                            <input type="email"
+                                   id="correo"
+                                   name="correo"
+                                   class="form-control"
+                                   th:field="*{correo}"
+                                   placeholder="correo@ejemplo.com"
+                                   required/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <input type="password"
+                                       id="password"
+                                       name="password"
+                                       class="form-control"
+                                       th:field="*{password}"
+                                       placeholder="••••••••"
+                                       required/>
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        id="togglePassword"
+                                        aria-label="Mostrar u ocultar contraseña">
+                                    <span class="bi bi-eye-slash" id="toggleIcon"></span>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                            <div class="form-text">Mínimo 6 caracteres.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="tel"
+                                   id="telefono"
+                                   name="telefono"
+                                   class="form-control"
+                                   th:field="*{telefono}"
+                                   placeholder="+51 987 654 321"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mt-3">
+                        Crear cuenta
+                    </button>
+
+                    <div class="text-center text-muted small mt-3">
+                        ¿Ya tiene cuenta? <a th:href="@{/login}" class="text-decoration-none fw-bold">Inicie sesión aquí</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer text-center bg-white border-0 pt-3">
+                <p class="mb-0 small">
+                    © 2026 Centro Psicológico MenteNova - Sistema de Gestión de Citas
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq4"
+        crossorigin="anonymous"></script>
+<script>
+    // Toggle mostrar / ocultar contraseña
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    toggleBtn.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        toggleIcon.classList.toggle('bi-eye');
+        toggleIcon.classList.toggle('bi-eye-slash');
+    });
+</script>
+</body>
+</html>

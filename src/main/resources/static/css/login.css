@@ -1,0 +1,77 @@
+/* ============================================================================
+   MenteNova - Estilos de la página de login
+   ============================================================================ */
+
+.login-container {
+    height: 100vh;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.login-brand {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    min-height: 40vh;
+}
+
+.login-brand .logo-img {
+    width: 120px;
+    height: auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.auth-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.auth-card .input-group > .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.auth-card .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    font-weight: 600;
+}
+
+.auth-card .btn-primary:hover {
+    background-color: #0a58ca;
+    border-color: #0a53be;
+}
+
+.auth-card .btn-outline-secondary {
+    border-left: none;
+}
+
+/* Responsive: en móvil las dos secciones se apilan */
+@media (max-width: 767.98px) {
+    .login-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .login-brand {
+        display: flex !important;
+        min-height: 30vh;
+        padding: 2rem 1rem;
+    }
+
+    .login-brand .logo-img {
+        width: 100px;
+    }
+
+    .login-brand h1 {
+        font-size: 1.75rem;
+    }
+
+    .login-form {
+        padding: 2rem 1rem;
+    }
+
+    .auth-card {
+        max-width: 100%;
+    }
+}
