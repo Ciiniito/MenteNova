@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Información no disponible')}"></head>
+<body class="mn-panel">
+<main class="mn-error-page">
+    <div class="mn-card mn-error-card">
+        <div class="mn-kpi__icon mn-tone--PENDIENTE"><i class="bi bi-database-exclamation" aria-hidden="true"></i></div>
+        <h1 class="h4 fw-bold">No se pudo consultar la información</h1>
+        <p class="text-secondary">
+            El dashboard y los reportes necesitan las tablas del modelo de datos completo
+            (citas, pacientes, psicólogos y pagos).
+        </p>
+        <p class="mn-nota">
+            Verifique que se haya ejecutado el script DDL del APF2 (sección 6.2) en la base de datos
+            y revise el log de la aplicación para más detalle.
+        </p>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <a th:href="@{/dashboard}" class="btn btn-primary">Reintentar</a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-light border">Cerrar sesión</button>
+            </form>
+        </div>
+    </div>
+</main>
+</body>
+</html>

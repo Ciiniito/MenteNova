@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Inasistencias y cancelaciones')}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('reportes-inasistencias')}"></aside>
+
+    <main class="mn-main"
+          th:with="r=${reporte}, g=${reporte.global},
+                   subtitulo=${vistaCompleta ? 'Reporte gerencial · Administrador' : 'Reporte gerencial · Vista limitada de Recepción'}">
+        <header th:replace="~{fragments/panel :: topbar('Tasa de inasistencias y cancelaciones', ${subtitulo})}"></header>
+        <div th:replace="~{fragments/panel :: encabezado-impresion('Reporte de tasa de inasistencias y cancelaciones')}"></div>
+
+        <form th:action="@{/reportes/inasistencias}" method="get" th:object="${filtro}" class="mn-card mn-filtros mb-4 mn-no-print">
+            <div class="row g-3 align-items-end">
+                <div class="col-6 col-md-3 col-xxl">
+                    <label for="desde" class="form-label">Desde</label>
+                    <input type="date" class="form-control" th:field="*{desde}"/>
+                </div>
+                <div class="col-6 col-md-3 col-xxl">
+                    <label for="hasta" class="form-label">Hasta</label>
+                    <input type="date" class="form-control" th:field="*{hasta}"/>
+                </div>
+                <div class="col-12 col-md-6 col-xxl">
+                    <label for="idPsicologo" class="form-label">Psicólogo</label>
+                    <select class="form-select" th:field="*{idPsicologo}">
+                        <option value="">Todos</option>
+                        <option th:each="o : ${psicologos}" th:value="${o.valor}" th:text="${o.etiqueta}">Psicólogo</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3 col-xxl">
+                    <label for="modalidad" class="form-label">Modalidad</label>
+                    <select class="form-select" th:field="*{modalidad}">
+                        <option value="">Todas</option>
+                        <option th:each="o : ${modalidades}" th:value="${o.valor}" th:text="${o.etiqueta}">Modalidad</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3 col-xxl">
+                    <label for="agrupacion" class="form-label">Tendencia</label>
+                    <select class="form-select" th:field="*{agrupacion}">
+                        <option th:each="o : ${agrupaciones}" th:value="${o.valor}" th:text="${o.etiqueta}">Por semana</option>
+                    </select>
+                </div>
+                <div th:replace="~{fragments/panel :: acciones-filtro(@{/reportes/inasistencias})}"></div>
+            </div>
+        </form>
+
+        <section class="mn-kpis mb-4" aria-label="Tasas del periodo">
+            <div class="mn-card mn-kpi">
+                <div class="mn-kpi__icon mn-tone--serie1"><i class="bi bi-person-x" aria-hidden="true"></i></div>
+                <div>
+                    <div class="mn-kpi__label">Tasa de inasistencia</div>
+                    <div class="mn-kpi__value"
+                         th:text="${g.tasaInasistencia == null ? '—' : #numbers.formatDecimal(g.tasaInasistencia, 1, 'COMMA', 1, 'POINT') + ' %'}">0.0 %</div>
+                    <div class="mn-kpi__hint"
+                         th:text="${g.noAsistio} + ' no asistió / ' + ${g.atendidas + g.noAsistio} + ' finalizadas'">0 / 0</div>
+                </div>
+            </div>
+            <div class="mn-card mn-kpi">
+                <div class="mn-kpi__icon mn-tone--serie2"><i class="bi bi-x-circle" aria-hidden="true"></i></div>
+                <div>
+                    <div class="mn-kpi__label">Tasa de cancelación</div>
+                    <div class="mn-kpi__value"
+                         th:text="${g.tasaCancelacion == null ? '—' : #numbers.formatDecimal(g.tasaCancelacion, 1, 'COMMA', 1, 'POINT') + ' %'}">0.0 %</div>
+                    <div class="mn-kpi__hint"
+                         th:text="${g.canceladas} + ' canceladas / ' + ${g.registradas} + ' registradas'">0 / 0</div>
+                </div>
+            </div>
+            <div class="mn-card mn-kpi">
+                <div class="mn-kpi__icon mn-tone--primary"><i class="bi bi-calendar2-week" aria-hidden="true"></i></div>
+                <div>
+                    <div class="mn-kpi__label">Citas registradas</div>
+                    <div class="mn-kpi__value" th:text="${g.registradas}">0</div>
+                    <div class="mn-kpi__hint">Programadas en el periodo</div>
+                </div>
+            </div>
+            <div class="mn-card mn-kpi">
+                <div class="mn-kpi__icon mn-tone--ATENDIDA"><i class="bi bi-person-check" aria-hidden="true"></i></div>
+                <div>
+                    <div class="mn-kpi__label">Citas atendidas</div>
+                    <div class="mn-kpi__value" th:text="${g.atendidas}">0</div>
+                    <div class="mn-kpi__hint">Sesiones realizadas</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="mn-formula mb-4">
+            <strong>Cálculo (APF2, sección 5.3).</strong>
+            Tasa de inasistencia = citas "No asistió" / citas finalizadas aplicables (Atendidas + No asistió).
+            Tasa de cancelación = citas canceladas / citas registradas del periodo.
+            Se muestra "—" cuando no hay citas para calcular la tasa.
+        </div>
+
+        <section class="mn-card mb-4">
+            <div class="mn-card__header">
+                <div>
+                    <h2 class="mn-card__title">Tendencia</h2>
+                    <p class="mn-card__subtitle" th:text="${r.agrupacion == 'MES'} ? 'Por mes' : 'Por semana (inicio el lunes)'">Por semana</p>
+                </div>
+            </div>
+            <div class="mn-card__body">
+                <div class="mn-chart mn-chart--alto">
+                    <canvas id="graficoTendencia" role="img"
+                            aria-label="Gráfico de líneas de la tasa de inasistencia y la tasa de cancelación por periodo; los valores están en la tabla siguiente"></canvas>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table mn-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Periodo</th>
+                        <th scope="col" class="mn-num">Registradas</th>
+                        <th scope="col" class="mn-num">Atendidas</th>
+                        <th scope="col" class="mn-num">No asistió</th>
+                        <th scope="col" class="mn-num">Canceladas</th>
+                        <th scope="col" class="mn-num">Tasa de inasistencia</th>
+                        <th scope="col" class="mn-num">Tasa de cancelación</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="t : ${r.tendencia}">
+                        <td class="text-nowrap" th:text="${t.etiqueta}">Sem. 05/10</td>
+                        <td class="mn-num" th:text="${t.registradas}">0</td>
+                        <td class="mn-num" th:text="${t.atendidas}">0</td>
+                        <td class="mn-num" th:text="${t.noAsistio}">0</td>
+                        <td class="mn-num" th:text="${t.canceladas}">0</td>
+                        <td class="mn-num" th:text="${t.tasaInasistencia == null ? '—' : #numbers.formatDecimal(t.tasaInasistencia, 1, 'COMMA', 1, 'POINT') + ' %'}">0.0 %</td>
+                        <td class="mn-num" th:text="${t.tasaCancelacion == null ? '—' : #numbers.formatDecimal(t.tasaCancelacion, 1, 'COMMA', 1, 'POINT') + ' %'}">0.0 %</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="mn-card" th:if="${vistaCompleta}">
+            <div class="mn-card__header">
+                <h2 class="mn-card__title">Tasas por psicólogo</h2>
+            </div>
+            <div th:if="${#lists.isEmpty(r.porPsicologo)}" class="mn-empty">
+                <i class="bi bi-inbox" aria-hidden="true"></i>
+                No hay citas para los filtros seleccionados.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(r.porPsicologo)}">
+                <table class="table mn-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Psicólogo</th>
+                        <th scope="col" class="mn-num">Registradas</th>
+                        <th scope="col" class="mn-num">Atendidas</th>
+                        <th scope="col" class="mn-num">No asistió</th>
+                        <th scope="col" class="mn-num">Canceladas</th>
+                        <th scope="col" class="mn-num">Tasa de inasistencia</th>
+                        <th scope="col" class="mn-num">Tasa de cancelación</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="t : ${r.porPsicologo}">
+                        <td th:text="${t.etiqueta}">Psicólogo</td>
+                        <td class="mn-num" th:text="${t.registradas}">0</td>
+                        <td class="mn-num" th:text="${t.atendidas}">0</td>
+                        <td class="mn-num" th:text="${t.noAsistio}">0</td>
+                        <td class="mn-num" th:text="${t.canceladas}">0</td>
+                        <td class="mn-num" th:text="${t.tasaInasistencia == null ? '—' : #numbers.formatDecimal(t.tasaInasistencia, 1, 'COMMA', 1, 'POINT') + ' %'}">0.0 %</td>
+                        <td class="mn-num" th:text="${t.tasaCancelacion == null ? '—' : #numbers.formatDecimal(t.tasaCancelacion, 1, 'COMMA', 1, 'POINT') + ' %'}">0.0 %</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <p class="mn-nota mb-0" th:unless="${vistaCompleta}">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            Vista limitada: el comparativo de tasas por psicólogo está disponible para el Administrador.
+        </p>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+<th:block th:replace="~{fragments/panel :: graficos}"></th:block>
+<script th:inline="javascript">
+    const tendencia = /*[[${reporte.tendencia}]]*/ [];
+    MenteNovaGraficos.lineasPorcentaje('graficoTendencia', tendencia.map(t => t.etiqueta), [
+        {nombre: 'Tasa de inasistencia', valores: tendencia.map(t => t.tasaInasistencia)},
+        {nombre: 'Tasa de cancelación', valores: tendencia.map(t => t.tasaCancelacion)}
+    ]);
+</script>
+</body>
+</html>

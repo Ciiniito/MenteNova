@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Reporte de citas')}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('reportes-citas')}"></aside>
+
+    <main class="mn-main" th:with="r=${reporte}">
+        <header th:replace="~{fragments/panel :: topbar('Citas por estado y psicólogo', 'Reporte operativo · Administrador y Recepcionista')}"></header>
+        <div th:replace="~{fragments/panel :: encabezado-impresion('Reporte de citas por estado y psicólogo')}"></div>
+
+        <form th:action="@{/reportes/citas}" method="get" th:object="${filtro}" class="mn-card mn-filtros mb-4 mn-no-print">
+            <div class="row g-3 align-items-end">
+                <div class="col-6 col-md-3 col-xxl">
+                    <label for="desde" class="form-label">Desde</label>
+                    <input type="date" class="form-control" th:field="*{desde}"/>
+                </div>
+                <div class="col-6 col-md-3 col-xxl">
+                    <label for="hasta" class="form-label">Hasta</label>
+                    <input type="date" class="form-control" th:field="*{hasta}"/>
+                </div>
+                <div class="col-12 col-md-6 col-xxl">
+                    <label for="idPsicologo" class="form-label">Psicólogo</label>
+                    <select class="form-select" th:field="*{idPsicologo}">
+                        <option value="">Todos</option>
+                        <option th:each="o : ${psicologos}" th:value="${o.valor}" th:text="${o.etiqueta}">Psicólogo</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-xxl">
+                    <label for="idEspecialidad" class="form-label">Especialidad</label>
+                    <select class="form-select" th:field="*{idEspecialidad}">
+                        <option value="">Todas</option>
+                        <option th:each="o : ${especialidades}" th:value="${o.valor}" th:text="${o.etiqueta}">Especialidad</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3 col-xxl">
+                    <label for="modalidad" class="form-label">Modalidad</label>
+                    <select class="form-select" th:field="*{modalidad}">
+                        <option value="">Todas</option>
+                        <option th:each="o : ${modalidades}" th:value="${o.valor}" th:text="${o.etiqueta}">Modalidad</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3 col-xxl">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" th:field="*{estado}">
+                        <option value="">Todos</option>
+                        <option th:each="o : ${estados}" th:value="${o.valor}" th:text="${o.etiqueta}">Estado</option>
+                    </select>
+                </div>
+                <div th:replace="~{fragments/panel :: acciones-filtro(@{/reportes/citas})}"></div>
+            </div>
+        </form>
+
+        <section class="mn-kpis mn-kpis--compactos mb-4" aria-label="Indicadores del periodo">
+            <div class="mn-card mn-kpi">
+                <div class="mn-kpi__icon mn-tone--primary"><i class="bi bi-calendar2-week" aria-hidden="true"></i></div>
+                <div>
+                    <div class="mn-kpi__label">Total de citas</div>
+                    <div class="mn-kpi__value" th:text="${r.resumen.total}">0</div>
+                </div>
+            </div>
+            <div class="mn-card mn-kpi" th:each="e : ${r.resumen.estados}">
+                <div class="mn-kpi__icon" th:classappend="'mn-tone--' + ${e.codigo}">
+                    <th:block th:replace="~{fragments/panel :: icono-estado(${e.codigo})}"></th:block>
+                </div>
+                <div>
+                    <div class="mn-kpi__label" th:text="${e.nombre}">Pendiente</div>
+                    <div class="mn-kpi__value" th:text="${e.total}">0</div>
+                    <div class="mn-kpi__hint" th:text="${#numbers.formatDecimal(e.porcentaje, 1, 'COMMA', 1, 'POINT')} + ' % del total'">0.0 % del total</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="row g-4 mb-4">
+            <div class="col-xl-5">
+                <section class="mn-card h-100">
+                    <div class="mn-card__header">
+                        <h2 class="mn-card__title">Citas por estado</h2>
+                    </div>
+                    <div class="mn-card__body">
+                        <div class="mn-chart">
+                            <canvas id="graficoEstados" role="img"
+                                    aria-label="Gráfico de barras de citas por estado; los valores están en los indicadores superiores"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-xl-7">
+                <section class="mn-card h-100">
+                    <div class="mn-card__header">
+                        <h2 class="mn-card__title">Distribución por psicólogo</h2>
+                    </div>
+                    <div th:if="${#lists.isEmpty(r.porPsicologo)}" class="mn-empty">
+                        <i class="bi bi-inbox" aria-hidden="true"></i>
+                        No hay citas para los filtros seleccionados.
+                    </div>
+                    <div class="table-responsive" th:unless="${#lists.isEmpty(r.porPsicologo)}">
+                        <table class="table mn-table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Psicólogo</th>
+                                <th scope="col" class="mn-num">Total</th>
+                                <th scope="col" class="mn-num" title="Pendientes">Pend.</th>
+                                <th scope="col" class="mn-num" title="Confirmadas">Conf.</th>
+                                <th scope="col" class="mn-num" title="Atendidas">Atend.</th>
+                                <th scope="col" class="mn-num" title="Canceladas">Canc.</th>
+                                <th scope="col" class="mn-num" title="Reprogramadas">Reprog.</th>
+                                <th scope="col" class="mn-num" title="No asistió">No asist.</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="p : ${r.porPsicologo}">
+                                <td>
+                                    <div th:text="${p.psicologo}">Laura Méndez</div>
+                                    <div class="mn-barra mt-1" th:title="${#numbers.formatDecimal(p.total * 100.0 / r.resumen.total, 1, 'COMMA', 1, 'POINT')} + ' % del total'">
+                                        <span th:style="'width:' + ${p.total * 100.0 / r.resumen.total} + '%'"></span>
+                                    </div>
+                                </td>
+                                <td class="mn-num fw-semibold" th:text="${p.total}">0</td>
+                                <td class="mn-num" th:text="${p.pendientes}">0</td>
+                                <td class="mn-num" th:text="${p.confirmadas}">0</td>
+                                <td class="mn-num" th:text="${p.atendidas}">0</td>
+                                <td class="mn-num" th:text="${p.canceladas}">0</td>
+                                <td class="mn-num" th:text="${p.reprogramadas}">0</td>
+                                <td class="mn-num" th:text="${p.noAsistio}">0</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <section class="mn-card">
+            <div class="mn-card__header">
+                <div>
+                    <h2 class="mn-card__title">Detalle de citas</h2>
+                    <p class="mn-card__subtitle" th:text="${#lists.size(r.detalle) == 1 ? '1 cita' : #lists.size(r.detalle) + ' citas'}">0 citas</p>
+                </div>
+            </div>
+            <div th:if="${r.detalleTruncado}" class="alert alert-info rounded-0 border-0 mb-0 small" role="status">
+                Se muestran las primeras <span th:text="${limiteDetalle}">500</span> citas. Los indicadores sí
+                consideran todo el periodo; acote el rango de fechas para ver el detalle completo.
+            </div>
+            <div th:if="${#lists.isEmpty(r.detalle)}" class="mn-empty">
+                <i class="bi bi-inbox" aria-hidden="true"></i>
+                No hay citas para los filtros seleccionados.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(r.detalle)}">
+                <table class="table mn-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Hora</th>
+                        <th scope="col">Paciente</th>
+                        <th scope="col">Psicólogo</th>
+                        <th scope="col">Modalidad</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Registrada</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${r.detalle}">
+                        <td class="text-nowrap" th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}">29/10/2026</td>
+                        <td class="text-nowrap" th:text="${#temporals.format(c.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(c.horaFin, 'HH:mm')}">09:00 - 10:00</td>
+                        <td th:text="${c.paciente}">Paciente</td>
+                        <td th:text="${c.psicologo}">Psicólogo</td>
+                        <td><span th:replace="~{fragments/panel :: modalidad(${c.modalidad})}"></span></td>
+                        <td><span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}" th:text="${c.estadoNombre}">Estado</span></td>
+                        <td class="text-nowrap text-secondary" th:text="${#temporals.format(c.fechaRegistro, 'dd/MM/yyyy HH:mm')}">27/10/2026 10:00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mn-card__footer">
+                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                Solo datos administrativos mínimos del paciente; el reporte no expone información clínica (RN07, RNF03).
+            </div>
+        </section>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+<th:block th:replace="~{fragments/panel :: graficos}"></th:block>
+<script th:inline="javascript">
+    const estados = /*[[${reporte.resumen.estados}]]*/ [];
+    MenteNovaGraficos.barrasHorizontales('graficoEstados', estados.map(e => e.nombre), estados.map(e => e.total));
+</script>
+</body>
+</html>

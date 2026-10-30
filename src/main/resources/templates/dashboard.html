@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Dashboard')}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('dashboard')}"></aside>
+
+    <main class="mn-main"
+          th:with="d=${dashboard},
+                   saludo=${'¡Hola, ' + usuarioSesion.nombres + '!'},
+                   subtitulo=${dashboard.alcance == 'GENERAL' ? 'Aquí tienes un resumen general del centro.'
+                        : (dashboard.alcance == 'PSICOLOGO' ? 'Este es el resumen de tu agenda.' : 'Aquí puedes revisar tus próximas citas.')}">
+        <header th:replace="~{fragments/panel :: topbar(${saludo}, ${subtitulo})}"></header>
+
+        <section th:if="${d.alcance == 'PACIENTE'}" class="mn-card">
+            <div class="mn-card__header">
+                <h2 class="mn-card__title">Mis próximas citas</h2>
+            </div>
+            <div th:if="${!d.vinculado}" class="mn-empty">
+                <i class="bi bi-person-vcard" aria-hidden="true"></i>
+                Tu cuenta aún no está vinculada a una ficha de paciente.
+                Comunícate con recepción para registrar tu primera cita.
+            </div>
+            <div th:if="${d.vinculado and #lists.isEmpty(d.proximasCitas)}" class="mn-empty">
+                <i class="bi bi-calendar-x" aria-hidden="true"></i>
+                No tienes citas programadas.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(d.proximasCitas)}">
+                <table class="table mn-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Hora</th>
+                        <th scope="col">Psicólogo</th>
+                        <th scope="col">Modalidad</th>
+                        <th scope="col">Estado</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${d.proximasCitas}">
+                        <td th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}">29/10/2026</td>
+                        <td th:text="${#temporals.format(c.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(c.horaFin, 'HH:mm')}">09:00 - 10:00</td>
+                        <td th:text="${c.psicologo}">Laura Méndez</td>
+                        <td><span th:replace="~{fragments/panel :: modalidad(${c.modalidad})}"></span></td>
+                        <td><span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}" th:text="${c.estadoNombre}">Confirmada</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mn-card__footer">
+                Para reprogramar o cancelar una cita, comunícate con recepción.
+            </div>
+        </section>
+
+        <div th:if="${d.alcance == 'PSICOLOGO' and !d.vinculado}" class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            Tu usuario no está vinculado a un registro de psicólogo. Solicita al Administrador que complete tu ficha profesional.
+        </div>
+
+        <th:block th:if="${d.alcance != 'PACIENTE' and d.vinculado}"
+                  th:with="general=${d.alcance == 'GENERAL'}, hoy=${d.hoy}">
+
+            <section class="mn-kpis mb-4" aria-label="Resumen de hoy">
+                <div class="mn-card mn-kpi">
+                    <div class="mn-kpi__icon mn-tone--primary"><i class="bi bi-calendar-check" aria-hidden="true"></i></div>
+                    <div>
+                        <div class="mn-kpi__label">Citas de hoy</div>
+                        <div class="mn-kpi__value" th:text="${d.resumenHoy.total}">0</div>
+                        <div class="mn-kpi__hint" th:text="${#temporals.format(hoy, 'dd/MM/yyyy')}">29/10/2026</div>
+                    </div>
+                </div>
+                <div class="mn-card mn-kpi">
+                    <div class="mn-kpi__icon mn-tone--PENDIENTE"><i class="bi bi-hourglass-split" aria-hidden="true"></i></div>
+                    <div>
+                        <div class="mn-kpi__label">Pendientes</div>
+                        <div class="mn-kpi__value" th:text="${d.resumenHoy.cantidad('PENDIENTE')}">0</div>
+                        <div class="mn-kpi__hint">Por confirmar hoy</div>
+                    </div>
+                </div>
+                <div class="mn-card mn-kpi">
+                    <div class="mn-kpi__icon mn-tone--CONFIRMADA"><i class="bi bi-check2-circle" aria-hidden="true"></i></div>
+                    <div>
+                        <div class="mn-kpi__label">Confirmadas</div>
+                        <div class="mn-kpi__value" th:text="${d.resumenHoy.cantidad('CONFIRMADA')}">0</div>
+                        <div class="mn-kpi__hint">Agenda bloqueada hoy</div>
+                    </div>
+                </div>
+                <div class="mn-card mn-kpi">
+                    <div class="mn-kpi__icon mn-tone--CANCELADA"><i class="bi bi-x-circle" aria-hidden="true"></i></div>
+                    <div>
+                        <div class="mn-kpi__label">Canceladas</div>
+                        <div class="mn-kpi__value" th:text="${d.resumenHoy.cantidad('CANCELADA')}">0</div>
+                        <div class="mn-kpi__hint">Horarios liberados hoy</div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="row g-4 mb-4">
+                <div class="col-xl-8">
+                    <section class="mn-card h-100">
+                        <div class="mn-card__header">
+                            <div>
+                                <h2 class="mn-card__title">Próximas citas</h2>
+                                <p class="mn-card__subtitle" th:text="${general} ? 'Todas las citas desde este momento' : 'Tus citas desde este momento'">Desde este momento</p>
+                            </div>
+                            <a th:if="${usuarioSesion.puedeVerReportes()}" th:href="@{/reportes/citas}" class="mn-link">
+                                Ver reporte de citas <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                        <div th:if="${#lists.isEmpty(d.proximasCitas)}" class="mn-empty">
+                            <i class="bi bi-calendar-x" aria-hidden="true"></i>
+                            No hay citas próximas registradas.
+                        </div>
+                        <div class="table-responsive" th:unless="${#lists.isEmpty(d.proximasCitas)}">
+                            <table class="table mn-table">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Hora</th>
+                                    <th scope="col">Paciente</th>
+                                    <th scope="col" th:if="${general}">Psicólogo</th>
+                                    <th scope="col">Modalidad</th>
+                                    <th scope="col">Estado</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="c : ${d.proximasCitas}"
+                                    th:with="partes=${#strings.arraySplit(c.paciente, ' ')}">
+                                    <td class="text-nowrap"
+                                        th:text="${c.fecha == hoy ? 'Hoy' : (c.fecha == hoy.plusDays(1) ? 'Mañana' : #temporals.format(c.fecha, 'dd/MM/yyyy'))}">Hoy</td>
+                                    <td class="text-nowrap" th:text="${#temporals.format(c.horaInicio, 'HH:mm')}">09:00</td>
+                                    <td>
+                                        <div class="mn-persona">
+                                            <span class="mn-avatar"
+                                                  th:text="${#strings.substring(partes[0], 0, 1) + (partes.length > 1 ? #strings.substring(partes[1], 0, 1) : '')}">MG</span>
+                                            <span th:text="${c.paciente}">María González</span>
+                                        </div>
+                                    </td>
+                                    <td th:if="${general}" th:text="${c.psicologo}">Laura Méndez</td>
+                                    <td><span th:replace="~{fragments/panel :: modalidad(${c.modalidad})}"></span></td>
+                                    <td><span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}" th:text="${c.estadoNombre}">Confirmada</span></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="col-xl-4">
+                    <section class="mn-card h-100" th:with="cal=${d.calendario}">
+                        <div class="mn-card__header">
+                            <a class="mn-icon-btn" aria-label="Mes anterior"
+                               th:href="@{/dashboard(mes=${cal.anterior()}, desde=${d.desde}, hasta=${d.hasta})}">
+                                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                            </a>
+                            <h2 class="mn-card__title" th:text="${cal.titulo}">Octubre 2026</h2>
+                            <a class="mn-icon-btn" aria-label="Mes siguiente"
+                               th:href="@{/dashboard(mes=${cal.siguiente()}, desde=${d.desde}, hasta=${d.hasta})}">
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                        <div class="mn-card__body">
+                            <table class="mn-cal">
+                                <thead>
+                                <tr>
+                                    <th scope="col">LUN</th>
+                                    <th scope="col">MAR</th>
+                                    <th scope="col">MIÉ</th>
+                                    <th scope="col">JUE</th>
+                                    <th scope="col">VIE</th>
+                                    <th scope="col">SÁB</th>
+                                    <th scope="col">DOM</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="semana : ${cal.semanas}">
+                                    <td th:each="dia : ${semana}">
+                                        <a class="mn-cal__dia"
+                                           th:href="${usuarioSesion.puedeVerReportes()}
+                                                ? @{/reportes/citas(desde=${dia.fecha}, hasta=${dia.fecha})}
+                                                : @{/dashboard(desde=${dia.fecha}, hasta=${dia.fecha}, mes=${cal.mes})}"
+                                           th:classappend="${(dia.delMes ? '' : 'mn-cal-fuera ') + (dia.hoy ? 'mn-cal-hoy' : '')}"
+                                           th:title="${dia.citas == 1 ? '1 cita' : dia.citas + ' citas'}"
+                                           th:attr="aria-label=${#temporals.format(dia.fecha, 'dd/MM/yyyy') + ': ' + dia.citas + (dia.citas == 1 ? ' cita' : ' citas')}">
+                                            <span th:text="${dia.fecha.dayOfMonth}">1</span>
+                                            <span class="mn-cal__punto" th:if="${dia.citas > 0}"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="mn-nota"><span class="mn-cal__punto d-inline-block align-middle me-1"></span>Días con citas</span>
+                                <a th:href="@{/dashboard(desde=${d.desde}, hasta=${d.hasta})}" class="btn btn-sm btn-light border">Hoy</a>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <section class="mn-card" th:with="lunes=${hoy.minusDays(hoy.dayOfWeek.value - 1)}">
+                <div class="mn-card__header">
+                    <div>
+                        <h2 class="mn-card__title">Citas por estado</h2>
+                        <p class="mn-card__subtitle">
+                            <span th:text="${#temporals.format(d.desde, 'dd/MM/yyyy')}">01/10/2026</span> al
+                            <span th:text="${#temporals.format(d.hasta, 'dd/MM/yyyy')}">31/10/2026</span> ·
+                            <span th:text="${d.resumenPeriodo.total == 1 ? '1 cita' : d.resumenPeriodo.total + ' citas'}">0 citas</span>
+                        </p>
+                    </div>
+                    <nav class="mn-presets" aria-label="Periodos rápidos">
+                        <a th:href="@{/dashboard(desde=${hoy}, hasta=${hoy})}"
+                           th:classappend="${d.desde == hoy and d.hasta == hoy} ? 'active'">Hoy</a>
+                        <a th:href="@{/dashboard(desde=${lunes}, hasta=${lunes.plusDays(6)})}"
+                           th:classappend="${d.desde == lunes and d.hasta == lunes.plusDays(6)} ? 'active'">Esta semana</a>
+                        <a th:href="@{/dashboard(desde=${hoy.withDayOfMonth(1)}, hasta=${hoy.withDayOfMonth(hoy.lengthOfMonth())})}"
+                           th:classappend="${d.desde == hoy.withDayOfMonth(1) and d.hasta == hoy.withDayOfMonth(hoy.lengthOfMonth())} ? 'active'">Este mes</a>
+                        <a th:href="@{/dashboard(desde=${hoy.minusDays(29)}, hasta=${hoy})}"
+                           th:classappend="${d.desde == hoy.minusDays(29) and d.hasta == hoy} ? 'active'">Últimos 30 días</a>
+                    </nav>
+                </div>
+                <div class="mn-card__body">
+                    <form th:action="@{/dashboard}" method="get" class="row g-2 align-items-end mb-4">
+                        <input type="hidden" name="mes" th:value="${d.calendario.mes}"/>
+                        <div class="col-6 col-md-auto">
+                            <label for="desde" class="form-label small text-secondary mb-1">Desde</label>
+                            <input type="date" id="desde" name="desde" class="form-control form-control-sm" th:value="${d.desde}" required/>
+                        </div>
+                        <div class="col-6 col-md-auto">
+                            <label for="hasta" class="form-label small text-secondary mb-1">Hasta</label>
+                            <input type="date" id="hasta" name="hasta" class="form-control form-control-sm" th:value="${d.hasta}" required/>
+                        </div>
+                        <div class="col-12 col-md-auto">
+                            <button type="submit" class="btn btn-sm btn-primary">Consultar periodo</button>
+                        </div>
+                    </form>
+
+                    <div class="row g-4 align-items-center">
+                        <div class="col-lg-7">
+                            <div class="mn-chart">
+                                <canvas id="graficoEstados" role="img"
+                                        aria-label="Gráfico de barras de citas por estado; los valores están en la tabla adjunta"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="table-responsive">
+                                <table class="table mn-table">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">Estado</th>
+                                        <th scope="col" class="mn-num">Citas</th>
+                                        <th scope="col" class="mn-num">%</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="e : ${d.resumenPeriodo.estados}">
+                                        <td><span class="mn-estado" th:classappend="'mn-tone--' + ${e.codigo}" th:text="${e.nombre}">Pendiente</span></td>
+                                        <td class="mn-num" th:text="${e.total}">0</td>
+                                        <td class="mn-num" th:text="${#numbers.formatDecimal(e.porcentaje, 1, 'COMMA', 1, 'POINT')} + ' %'">0.0 %</td>
+                                    </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <td>Total</td>
+                                        <td class="mn-num" th:text="${d.resumenPeriodo.total}">0</td>
+                                        <td></td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </th:block>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+<th:block th:if="${dashboard.resumenPeriodo != null}">
+    <th:block th:replace="~{fragments/panel :: graficos}"></th:block>
+    <script th:inline="javascript">
+        const estados = /*[[${dashboard.resumenPeriodo.estados}]]*/ [];
+        MenteNovaGraficos.barrasHorizontales('graficoEstados', estados.map(e => e.nombre), estados.map(e => e.total));
+    </script>
+</th:block>
+</body>
+</html>

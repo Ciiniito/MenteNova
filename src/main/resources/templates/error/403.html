@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Acceso restringido')}"></head>
+<body class="mn-panel">
+<main class="mn-error-page">
+    <div class="mn-card mn-error-card">
+        <div class="mn-kpi__icon mn-tone--CANCELADA"><i class="bi bi-shield-lock" aria-hidden="true"></i></div>
+        <h1 class="h4 fw-bold">Acceso restringido</h1>
+        <p class="text-secondary">
+            Tu rol no tiene permiso para ver esta sección. Los permisos siguen la matriz de roles
+            del sistema (mínimo privilegio).
+        </p>
+        <a th:href="@{/dashboard}" class="btn btn-primary mt-2">Volver al inicio</a>
+    </div>
+</main>
+</body>
+</html>
