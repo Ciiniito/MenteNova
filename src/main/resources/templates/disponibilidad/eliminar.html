@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/panel :: head('Eliminar registro')}"></head>
+<body class="mn-panel mn-psicologos mn-planificacion">
+<div class="mn-layout"><aside th:replace="~{fragments/panel :: sidebar('disponibilidad')}"></aside>
+<main class="mn-main psi-main">
+<div class="psi-page-top"><header th:replace="~{fragments/panel :: topbar('Eliminar registro', 'Confirma el cambio en la disponibilidad.')}"></header><span class="psi-context"><span class="psi-dot"></span> Equipo clínico</span></div>
+<div th:if="${exito}" class="psi-alert psi-alert--success" role="status" th:text="${exito}"></div>
+<div th:if="${error}" class="psi-alert psi-alert--error" role="alert" th:text="${error}"></div>
+
+<section class="psi-delete"><p class="psi-eyebrow">DISPONIBILIDAD</p><h2 th:text="${tipo == 'horarios'} ? '¿Eliminar esta franja semanal?' : '¿Eliminar esta excepción?'"></h2><p th:text="${psicologo.usuario.nombres + ' ' + psicologo.usuario.apellidos}"></p><p th:text="${#temporals.format(registro.horaInicio,'HH:mm') + ' – ' + #temporals.format(registro.horaFin,'HH:mm')}"></p><p>Este cambio actualiza la disponibilidad y conserva las citas existentes.</p><form th:action="@{/psicologos/{id}/disponibilidad/{tipo}/{registroId}/eliminar(id=${psicologo.id},tipo=${tipo},registroId=${registroId})}" method="post" class="psi-delete__actions"><a th:href="@{/psicologos/{id}/disponibilidad(id=${psicologo.id})}" class="psi-button psi-button--secondary"><i class="bi bi-x-lg" aria-hidden="true"></i> <span>Cancelar</span></a><button type="submit" class="psi-button psi-button--danger"><i class="bi bi-trash3" aria-hidden="true"></i> <span>Sí, eliminar registro</span></button></form></section>
+<footer class="psi-page-footer">MenteNova · Centro Psicológico</footer>
+</main></div><th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body></html>

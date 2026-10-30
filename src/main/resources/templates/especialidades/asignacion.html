@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/panel :: head('Especialidades del psicólogo')}"></head>
+<body class="mn-panel mn-psicologos mn-planificacion">
+<div class="mn-layout"><aside th:replace="~{fragments/panel :: sidebar('psicologos')}"></aside>
+<main class="mn-main psi-main">
+<div class="psi-page-top"><header th:replace="~{fragments/panel :: topbar('Especialidades del psicólogo', 'Selecciona las áreas de atención del profesional.')}"></header><span class="psi-context"><span class="psi-dot"></span> Equipo clínico</span></div>
+<div th:if="${exito}" class="psi-alert psi-alert--success" role="status" th:text="${exito}"></div>
+<div th:if="${error}" class="psi-alert psi-alert--error" role="alert" th:text="${error}"></div>
+
+<a th:href="@{/psicologos}" class="psi-back"><i class="bi bi-arrow-left" aria-hidden="true"></i> <span>Volver al directorio</span></a>
+<form th:action="@{/psicologos/{id}/especialidades(id=${psicologo.id})}" method="post" class="psi-form plan-short-form">
+<div class="psi-form__intro"><h3 th:text="${psicologo.usuario.nombres + ' ' + psicologo.usuario.apellidos}"></h3><span>Puedes seleccionar varias especialidades.</span></div>
+<div class="psi-form-section plan-checklist">
+<label th:each="e : ${especialidades}" class="plan-check"><input type="checkbox" name="especialidadIds" th:value="${e.id}" th:checked="${asignadas.contains(e.id)}" th:disabled="${!e.activo and !asignadas.contains(e.id)}"><span><strong th:text="${e.nombre}"></strong><small th:text="${e.activo} ? ${e.descripcion} : 'Inactiva: puedes conservarla o quitarla.'"></small></span></label>
+<p th:if="${#lists.isEmpty(especialidades)}">Primero registra una especialidad en el catálogo.</p>
+<a th:href="@{/especialidades}" class="psi-back"><i class="bi bi-tags" aria-hidden="true"></i> <span>Ir al catálogo de especialidades</span></a>
+</div><div class="psi-form-actions"><a th:href="@{/psicologos}" class="psi-button psi-button--secondary"><i class="bi bi-x-lg" aria-hidden="true"></i> <span>Cancelar</span></a><button type="submit" class="psi-button psi-button--primary"><i class="bi bi-check2-circle" aria-hidden="true"></i> <span>Guardar especialidades</span></button></div></form>
+<footer class="psi-page-footer">MenteNova · Centro Psicológico</footer>
+</main></div><th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body></html>

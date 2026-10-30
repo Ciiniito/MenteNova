@@ -227,3 +227,91 @@ body.mn-psicologos {
     .mn-psicologos .psi-delete h2 { font-size: 22px; }
     .mn-psicologos .psi-delete__actions .psi-button { width: 100%; }
 }
+/* Especialidades, disponibilidad y agenda */
+.mn-planificacion .plan-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; align-items:start; }
+.mn-planificacion .plan-inline-form { padding:24px; border-bottom:1px solid var(--psi-line); }
+.mn-planificacion .plan-form-buttons { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; margin-top:20px; }
+.mn-planificacion .plan-rows { padding:0 24px; }
+.mn-planificacion .plan-row { display:flex; justify-content:space-between; align-items:center; gap:15px; padding:20px 0; border-bottom:1px solid var(--psi-line); }
+.mn-planificacion .plan-row:last-child { border:0; }
+.mn-planificacion .plan-row strong,.mn-planificacion .plan-time,.mn-planificacion .plan-row small { display:block; }
+.mn-planificacion .plan-row strong { font-size:13px; }
+.mn-planificacion .plan-time { color:var(--psi-purple-dark); font-weight:600; margin:5px 0; font-size:13px; }
+.mn-planificacion .plan-row small { color:var(--psi-muted); max-width:280px; overflow-wrap:anywhere; }
+.mn-planificacion .plan-row-buttons { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; }
+.mn-planificacion .plan-no-data { padding:24px; color:var(--psi-muted); font-size:12px; margin:0; }
+.mn-planificacion .plan-note { margin:16px 0; padding:14px 18px; border:1px solid #dfdaf0; background:#f2effa; border-radius:9px; font-size:12px; color:#62527f; line-height:1.7; }
+.mn-planificacion .plan-availability { margin-top:24px; }
+.mn-planificacion .plan-availability > .plan-note { margin:0; border-radius:0; border-width:1px 0 0; }
+.mn-planificacion .plan-filter { display:flex; flex-wrap:wrap; align-items:flex-end; gap:15px; padding:20px 24px; }
+.mn-planificacion .plan-filter .psi-field { flex:1; min-width:150px; }
+.mn-planificacion .plan-free { display:flex; flex-wrap:wrap; gap:12px; padding:0 24px 24px; }
+.mn-planificacion .plan-free p { color:var(--psi-muted); font-size:13px; margin:0; }
+.mn-planificacion .plan-free__slot { padding:12px 17px; border:1px solid #cde6d7; background:#edf8f1; color:#31724e; border-radius:8px; font-size:13px; font-weight:600; }
+.mn-planificacion .plan-catalog { padding:0 24px; }
+.mn-planificacion .plan-catalog__item { padding:23px 0; display:flex; justify-content:space-between; align-items:center; gap:20px; border-bottom:1px solid var(--psi-line); }
+.mn-planificacion .plan-catalog__item:last-child { border:0; }
+.mn-planificacion .plan-catalog__item h3 { font-size:15px; font-weight:600; margin:0 0 7px; }
+.mn-planificacion .plan-catalog__item p { font-size:12px; color:var(--psi-muted); margin:0 0 10px; }
+.mn-planificacion .plan-short-form { max-width:700px; }
+.mn-planificacion .plan-short-form .psi-field+.psi-field { margin-top:20px; }
+.mn-planificacion textarea { width:100%; border:1px solid #dce0ea; border-radius:8px; padding:12px; color:var(--psi-ink); font-size:13px; }
+.mn-planificacion .plan-checklist { display:flex; flex-direction:column; gap:13px; }
+.mn-planificacion .plan-check { display:flex; align-items:center; gap:15px; padding:17px; border:1px solid var(--psi-line); border-radius:9px; cursor:pointer; }
+.mn-planificacion .plan-check input { width:18px; height:18px; accent-color:var(--psi-purple); }
+.mn-planificacion .plan-check strong { display:block; font-size:13px; }
+.mn-planificacion .plan-check small { display:block; margin-top:5px; color:var(--psi-muted); font-size:11px; }
+.mn-psicologos .plan-specialties { display:block; margin-top:6px; font-size:10px; color:#6c6289; }
+.mn-planificacion .plan-agenda-nav { display:flex; justify-content:center; gap:12px; padding:0 20px 20px; }
+.mn-planificacion .plan-agenda { display:grid; gap:18px; margin-top:24px; }
+.mn-planificacion .plan-agenda--week { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+.mn-planificacion .plan-day h3 { margin:0; text-transform:capitalize; font-size:14px; font-weight:650; }
+.mn-planificacion .plan-day .psi-directory__heading { border-bottom:1px solid var(--psi-line); padding:20px; }
+.mn-planificacion .plan-appointment { display:flex; align-items:center; gap:17px; flex-wrap:wrap; padding:20px; border-bottom:1px solid var(--psi-line); }
+.mn-planificacion .plan-appointment:last-child { border:0; }
+.mn-planificacion .plan-appointment__time { color:var(--psi-purple-dark); font-size:12px; font-weight:650; white-space:nowrap; }
+.mn-planificacion .plan-appointment__details { flex:1; min-width:120px; }
+.mn-planificacion .plan-appointment__details strong { display:block; font-size:13px; }
+.mn-planificacion .plan-appointment__details span { display:block; font-size:11px; color:var(--psi-muted); margin-top:4px; }
+.mn-planificacion .plan-appointment--cancelled { background:#fcfafb; }
+@media (max-width:1100px) { .mn-planificacion .plan-grid,.mn-planificacion .plan-agenda--week { grid-template-columns:minmax(0,1fr); } }
+@media (max-width:767.98px) { .mn-planificacion .plan-inline-form { padding:20px; } .mn-planificacion .plan-rows { padding-inline:20px; } .mn-planificacion .plan-filter { padding:20px; } .mn-planificacion .plan-filter .psi-field { flex-basis:100%; } .mn-planificacion .plan-filter button { width:100%; } }
+/* Acciones con icono y texto: criterio visual del proyecto. */
+.mn-psicologos .psi-button > .bi,
+.mn-psicologos .psi-action > .bi,
+.mn-psicologos .psi-back > .bi,
+.mn-psicologos .psi-tab > .bi {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.1em;
+    font-size: 1.08em;
+    line-height: 1;
+}
+.mn-psicologos .psi-button > span,
+.mn-psicologos .psi-action > span { line-height: 1.35; }
+.mn-psicologos .psi-tab { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; }
+.mn-psicologos .psi-button,
+.mn-psicologos .psi-action { gap: 8px; }
+.mn-psicologos .psi-table--admin { min-width: 1000px; }
+.mn-psicologos .psi-table--admin th:nth-child(1) { width: 23%; }
+.mn-psicologos .psi-table--admin th:nth-child(2) { width: 12%; }
+.mn-psicologos .psi-table--admin th:nth-child(3) { width: 25%; }
+.mn-psicologos .psi-table--admin th:nth-child(4) { width: 11%; }
+.mn-psicologos .psi-table--admin th:nth-child(5) { width: 29%; }
+.mn-psicologos .psi-row-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; align-items: stretch; }
+.mn-psicologos .psi-row-actions .psi-action { min-height: 38px; padding: 8px; white-space: nowrap; }
+.mn-psicologos .psi-row-actions .psi-action:only-child { grid-column: 1 / -1; justify-self: start; padding-inline: 13px; }
+.mn-planificacion .plan-row-buttons .psi-action { min-height: 36px; }
+@media (max-width: 767.98px) {
+    .mn-psicologos .psi-table--admin { min-width: 0; }
+    .mn-psicologos .psi-row-actions .psi-action { min-height: 44px; }
+    .mn-psicologos .psi-tab { padding-inline: 12px; min-height: 40px; gap: 6px; }
+    .mn-planificacion .plan-row-buttons .psi-action { min-height: 44px; }
+    .mn-planificacion .plan-agenda-nav { gap: 8px; }
+    .mn-planificacion .plan-agenda-nav .psi-action { min-height: 42px; padding-inline: 9px; }
+}
+@media (max-width: 359.98px) {
+    .mn-psicologos .psi-tab { padding-inline: 7px; gap: 4px; font-size: 11px; }
+}

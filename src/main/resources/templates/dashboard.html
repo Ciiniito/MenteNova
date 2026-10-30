@@ -192,7 +192,7 @@
                             </table>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="mn-nota"><span class="mn-cal__punto d-inline-block align-middle me-1"></span>Días con citas</span>
-                                <a th:href="@{/dashboard(desde=${d.desde}, hasta=${d.hasta})}" class="btn btn-sm btn-light border">Hoy</a>
+                                <a th:href="@{/dashboard(desde=${d.desde}, hasta=${d.hasta})}" class="btn btn-sm btn-light border"><i class="bi bi-calendar-event" aria-hidden="true"></i> <span>Hoy</span></a>
                             </div>
                         </div>
                     </section>
@@ -211,7 +211,7 @@
                     </div>
                     <nav class="mn-presets" aria-label="Periodos rápidos">
                         <a th:href="@{/dashboard(desde=${hoy}, hasta=${hoy})}"
-                           th:classappend="${d.desde == hoy and d.hasta == hoy} ? 'active'">Hoy</a>
+                           th:classappend="${d.desde == hoy and d.hasta == hoy} ? 'active'"><i class="bi bi-calendar-event" aria-hidden="true"></i> <span>Hoy</span></a>
                         <a th:href="@{/dashboard(desde=${lunes}, hasta=${lunes.plusDays(6)})}"
                            th:classappend="${d.desde == lunes and d.hasta == lunes.plusDays(6)} ? 'active'">Esta semana</a>
                         <a th:href="@{/dashboard(desde=${hoy.withDayOfMonth(1)}, hasta=${hoy.withDayOfMonth(hoy.lengthOfMonth())})}"
@@ -232,7 +232,7 @@
                             <input type="date" id="hasta" name="hasta" class="form-control form-control-sm" th:value="${d.hasta}" required/>
                         </div>
                         <div class="col-12 col-md-auto">
-                            <button type="submit" class="btn btn-sm btn-primary">Consultar periodo</button>
+                            <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-search" aria-hidden="true"></i> <span>Consultar periodo</span></button>
                         </div>
                     </form>
 

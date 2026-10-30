@@ -25,7 +25,7 @@
                 <span>Si tiene citas, horarios u otros registros vinculados que impidan eliminarlo, se conservará el registro completo. Puedes desactivar su cuenta desde Editar.</span>
             </div>
             <form th:action="@{/psicologos/{id}/eliminar(id=${psicologo.id})}" method="post" class="psi-delete__actions">
-                <a th:href="@{/psicologos}" class="psi-button psi-button--secondary">Cancelar</a>
+                <a th:href="@{/psicologos}" class="psi-button psi-button--secondary"><i class="bi bi-x-lg" aria-hidden="true"></i> <span>Cancelar</span></a>
                 <button type="submit" class="psi-button psi-button--danger">
                     <i class="bi bi-trash3" aria-hidden="true"></i> Sí, eliminar psicólogo
                 </button>

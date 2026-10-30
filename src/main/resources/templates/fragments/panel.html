@@ -49,21 +49,18 @@
             </a>
 
             <th:block th:if="${esPersonal}">
-                <span class="mn-nav__link disabled" aria-disabled="true">
-                    <i class="bi bi-calendar3" aria-hidden="true"></i><span>Agenda</span>
-                    <small class="mn-nav__pronto">Pronto</small>
-                </span>
+                <a th:href="@{/agenda}" class="mn-nav__link" th:classappend="${activo == 'agenda'} ? 'active'"><i class="bi bi-calendar3" aria-hidden="true"></i><span>Agenda</span></a>
+                <a th:if="${usuarioSesion.rol == 'PSICOLOGO'}" th:href="@{/mi-disponibilidad}" class="mn-nav__link" th:classappend="${activo == 'disponibilidad'} ? 'active'"><i class="bi bi-calendar-week" aria-hidden="true"></i><span>Mi disponibilidad</span></a>
                 <th:block th:if="${usuarioSesion.rol != 'PSICOLOGO'}">
                     <span class="mn-nav__link disabled" aria-disabled="true">
                         <i class="bi bi-people" aria-hidden="true"></i><span>Pacientes</span>
                         <small class="mn-nav__pronto">Pronto</small>
                     </span>
-                    <a th:href="@{/psicologos}"
-                        class="mn-nav__link"
-                        th:classappend="${activo == 'psicologos'} ? 'active'">
-                        <i class="bi bi-person-badge" aria-hidden="true"></i>
-                        <span>Psicólogos</span>
-                        </a>
+                    <a th:href="@{/psicologos}" class="mn-nav__link"
+                       th:classappend="${activo == 'psicologos'} ? 'active'">
+                        <i class="bi bi-person-badge" aria-hidden="true"></i><span>Psicólogos</span>
+                    </a>
+                    <a th:if="${usuarioSesion.esAdministrador()}" th:href="@{/especialidades}" class="mn-nav__link" th:classappend="${activo == 'especialidades'} ? 'active'"><i class="bi bi-tags" aria-hidden="true"></i><span>Especialidades</span></a>
                     <span class="mn-nav__link disabled" aria-disabled="true">
                         <i class="bi bi-credit-card" aria-hidden="true"></i><span>Pagos</span>
                         <small class="mn-nav__pronto">Pronto</small>
@@ -130,7 +127,7 @@
     <button type="submit" class="btn btn-primary">
         <i class="bi bi-funnel" aria-hidden="true"></i> Aplicar
     </button>
-    <a th:href="${urlLimpiar}" class="btn btn-light border">Limpiar</a>
+    <a th:href="${urlLimpiar}" class="btn btn-light border"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <span>Limpiar</span></a>
     <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
         <i class="bi bi-printer" aria-hidden="true"></i> Imprimir / PDF
     </button>

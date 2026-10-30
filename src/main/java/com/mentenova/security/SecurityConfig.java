@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 
 import jakarta.servlet.ServletException;
@@ -37,9 +38,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.requireCsrfProtectionMatcher(
-                 new AndRequestMatcher(
+                new AndRequestMatcher(
                 CsrfFilter.DEFAULT_CSRF_MATCHER,
-                new AntPathRequestMatcher("/psicologos/**")
+                new OrRequestMatcher(
+                        new AntPathRequestMatcher("/psicologos/**"),
+                        new AntPathRequestMatcher("/especialidades/**")
+                )
                 )
                 ))
                 .authorizeHttpRequests(auth -> auth

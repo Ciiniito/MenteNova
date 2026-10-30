@@ -115,9 +115,9 @@
                     </div>
                 </section>
                 <div class="psi-form-actions">
-                    <a th:href="@{/psicologos}" class="psi-button psi-button--secondary">Cancelar</a>
+                    <a th:href="@{/psicologos}" class="psi-button psi-button--secondary"><i class="bi bi-x-lg" aria-hidden="true"></i> <span>Cancelar</span></a>
                     <button type="submit" class="psi-button psi-button--primary">
-                        <i class="bi bi-check2" aria-hidden="true"></i>
+                        <i class="bi bi-check2-circle" aria-hidden="true"></i>
                         <span th:text="${edicion} ? 'Guardar cambios' : 'Guardar psicólogo'">Guardar psicólogo</span>
                     </button>
                 </div>

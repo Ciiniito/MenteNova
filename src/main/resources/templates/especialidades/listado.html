@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/panel :: head('Especialidades')}"></head>
+<body class="mn-panel mn-psicologos mn-planificacion">
+<div class="mn-layout"><aside th:replace="~{fragments/panel :: sidebar('especialidades')}"></aside>
+<main class="mn-main psi-main">
+<div class="psi-page-top"><header th:replace="~{fragments/panel :: topbar('Especialidades', 'Organiza las áreas de atención del equipo.')}"></header><span class="psi-context"><span class="psi-dot"></span> Equipo clínico</span></div>
+<div th:if="${exito}" class="psi-alert psi-alert--success" role="status" th:text="${exito}"></div>
+<div th:if="${error}" class="psi-alert psi-alert--error" role="alert" th:text="${error}"></div>
+
+<div class="psi-section-heading"><div><p class="psi-eyebrow">CATÁLOGO DE ATENCIÓN</p><h2>Especialidades profesionales</h2><p>Registra las áreas que podrás asignar a cada psicólogo.</p></div><a th:href="@{/especialidades/nuevo}" class="psi-button psi-button--primary"><i class="bi bi-plus-lg" aria-hidden="true"></i> <span>Nueva especialidad</span></a></div>
+<section class="psi-directory"><div class="plan-catalog">
+<article th:each="e : ${especialidades}" class="plan-catalog__item"><div><h3 th:text="${e.nombre}"></h3><p th:text="${#strings.isEmpty(e.descripcion) ? 'Sin descripción' : e.descripcion}"></p><span class="psi-badge" th:classappend="${e.activo} ? 'psi-badge--active' : 'psi-badge--inactive'" th:text="${e.activo} ? 'Activa' : 'Inactiva'"></span></div><a th:href="@{/especialidades/{id}/editar(id=${e.id})}" class="psi-action"><i class="bi bi-pencil-square" aria-hidden="true"></i> <span>Editar</span></a></article>
+<div th:if="${#lists.isEmpty(especialidades)}" class="psi-empty"><h3>Aún no hay especialidades</h3><p>Crea la primera para asignarla a tu equipo.</p></div>
+</div></section>
+<footer class="psi-page-footer">MenteNova · Centro Psicológico</footer>
+</main></div><th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body></html>

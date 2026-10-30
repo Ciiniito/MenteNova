@@ -24,7 +24,7 @@
             </div>
             <a th:if="${usuarioSesion.esAdministrador()}" th:href="@{/psicologos/nuevo}"
                class="psi-button psi-button--primary">
-                <i class="bi bi-plus-lg" aria-hidden="true"></i> Registrar psicólogo
+                <i class="bi bi-person-plus" aria-hidden="true"></i> Registrar psicólogo
             </a>
         </div>
         <section class="psi-stats" aria-label="Resumen del equipo"
@@ -54,9 +54,9 @@
             </div>
             <div class="psi-toolbar" data-directory-tools hidden>
                 <div class="psi-tabs" role="group" aria-label="Filtrar por estado">
-                    <button type="button" class="psi-tab is-selected" data-status="todos" aria-pressed="true">Todos</button>
-                    <button type="button" class="psi-tab" data-status="activo" aria-pressed="false">Activos</button>
-                    <button type="button" class="psi-tab" data-status="inactivo" aria-pressed="false">Inactivos</button>
+                    <button type="button" class="psi-tab is-selected" data-status="todos" aria-pressed="true"><i class="bi bi-people" aria-hidden="true"></i> <span>Todos</span></button>
+                    <button type="button" class="psi-tab" data-status="activo" aria-pressed="false"><i class="bi bi-person-check" aria-hidden="true"></i> <span>Activos</span></button>
+                    <button type="button" class="psi-tab" data-status="inactivo" aria-pressed="false"><i class="bi bi-person-dash" aria-hidden="true"></i> <span>Inactivos</span></button>
                 </div>
                 <div class="psi-search">
                     <i class="bi bi-search" aria-hidden="true"></i>
@@ -66,12 +66,12 @@
                 </div>
             </div>
             <div class="psi-table-wrap" tabindex="0" aria-label="Tabla de profesionales" th:unless="${#lists.isEmpty(psicologos)}">
-                <table class="psi-table" role="table" th:classappend="${usuarioSesion.esAdministrador()} ? 'psi-table--admin'">
+                <table class="psi-table" role="table" th:classappend="'psi-table--admin'">
                     <caption class="visually-hidden">Profesionales registrados y datos de contacto</caption>
                     <thead role="rowgroup"><tr role="row">
                         <th scope="col" role="columnheader">Profesional</th><th scope="col" role="columnheader">Colegiatura</th>
                         <th scope="col" role="columnheader">Contacto</th><th scope="col" role="columnheader">Estado</th>
-                        <th scope="col" role="columnheader" th:if="${usuarioSesion.esAdministrador()}">Acciones</th>
+                        <th scope="col" role="columnheader">Gestión</th>
                     </tr></thead>
                     <tbody role="rowgroup">
                     <tr th:each="p : ${psicologos}" role="row" data-professional
@@ -83,7 +83,7 @@
                                       th:text="${#strings.toUpperCase(#strings.substring(p.usuario.nombres,0,1) + #strings.substring(p.usuario.apellidos,0,1))}">AP</span>
                                 <div class="psi-person__info">
                                     <strong th:text="${p.usuario.nombres + ' ' + p.usuario.apellidos}">Nombre completo</strong>
-                                    <span>Psicólogo(a)</span>
+                                    <span>Psicólogo(a)</span><small class="plan-specialties" th:if="${!#sets.isEmpty(p.especialidades)}"><span th:each="e,i : ${p.especialidades}" th:text="${e.nombre + (i.last ? '' : ', ')}"></span></small>
                                 </div>
                             </div>
                         </td>
@@ -96,13 +96,15 @@
                             <span class="psi-dot" aria-hidden="true"></span>
                             <span th:text="${cuentaActiva} ? 'Activo' : 'Inactivo'">Activo</span>
                         </span></td>
-                        <td role="cell" class="psi-actions-cell" th:if="${usuarioSesion.esAdministrador()}">
+                        <td role="cell" class="psi-actions-cell">
                             <div class="psi-row-actions">
-                                <a th:href="@{/psicologos/{id}/editar(id=${p.id})}" class="psi-action"
+                                <a th:href="@{/psicologos/{id}/disponibilidad(id=${p.id})}" class="psi-action"><i class="bi bi-calendar-week" aria-hidden="true"></i> <span>Horarios</span></a>
+                                <a th:if="${usuarioSesion.esAdministrador()}" th:href="@{/psicologos/{id}/especialidades(id=${p.id})}" class="psi-action"><i class="bi bi-tags" aria-hidden="true"></i> <span>Especialidades</span></a>
+                                <a th:href="@{/psicologos/{id}/editar(id=${p.id})}" class="psi-action" th:if="${usuarioSesion.esAdministrador()}"
                                    th:attr="aria-label='Editar a ' + ${p.usuario.nombres + ' ' + p.usuario.apellidos}">
                                     <i class="bi bi-pencil-square" aria-hidden="true"></i> Editar
                                 </a>
-                                <a th:href="@{/psicologos/{id}/eliminar(id=${p.id})}" class="psi-action psi-action--danger"
+                                <a th:href="@{/psicologos/{id}/eliminar(id=${p.id})}" class="psi-action psi-action--danger" th:if="${usuarioSesion.esAdministrador()}"
                                    th:attr="aria-label='Eliminar a ' + ${p.usuario.nombres + ' ' + p.usuario.apellidos}">
                                     <i class="bi bi-trash3" aria-hidden="true"></i> Eliminar
                                 </a>
@@ -117,13 +119,13 @@
                 <h3>Tu equipo empieza aquí</h3>
                 <p th:text="${usuarioSesion.esAdministrador()} ? 'Registra al primer psicólogo para comenzar a organizar tu equipo.' : 'Los profesionales aparecerán aquí cuando el administrador los registre.'"></p>
                 <a th:if="${usuarioSesion.esAdministrador()}" th:href="@{/psicologos/nuevo}"
-                   class="psi-button psi-button--primary">Registrar psicólogo</a>
+                   class="psi-button psi-button--primary"><i class="bi bi-person-plus" aria-hidden="true"></i> <span>Registrar psicólogo</span></a>
             </div>
             <div class="psi-empty" data-no-results hidden>
                 <span class="psi-empty__icon"><i class="bi bi-search" aria-hidden="true"></i></span>
                 <h3>No encontramos coincidencias</h3>
                 <p>Prueba otro nombre, correo o colegiatura.</p>
-                <button type="button" class="psi-button psi-button--secondary" data-reset>Limpiar filtros</button>
+                <button type="button" class="psi-button psi-button--secondary" data-reset><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <span>Limpiar filtros</span></button>
             </div>
             <div class="psi-directory__footer">
                 <span data-results role="status" aria-live="polite" aria-atomic="true"
