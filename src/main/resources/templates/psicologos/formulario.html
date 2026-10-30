@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/panel :: head('Registrar psicólogo')}"></head>
+
+<body class="mn-panel">
+<div class="mn-layout">
+
+    <aside th:replace="~{fragments/panel :: sidebar('psicologos')}"></aside>
+
+    <main class="mn-main">
+
+        <header th:replace="~{fragments/panel :: topbar('Registrar psicólogo', 'Crea su cuenta de acceso y sus datos profesionales.')}"></header>
+
+        <form th:action="@{/psicologos/guardar}"
+              th:object="${psicologoForm}"
+              method="post"
+              class="mn-card p-4">
+
+            <div th:if="${#fields.hasAnyErrors()}"
+                 class="alert alert-danger"
+                 role="alert">
+
+                <ul class="mb-0">
+                    <li th:each="error : ${#fields.allErrors()}"
+                        th:text="${error}">
+                    </li>
+                </ul>
+
+                <p class="mb-0 mt-2">
+                    Vuelve a escribir la contraseña para reintentar.
+                </p>
+            </div>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label for="nombres" class="form-label">
+                        Nombres
+                    </label>
+                    <input type="text"
+                           th:field="*{nombres}"
+                           class="form-control"
+                           maxlength="80"
+                           required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="apellidos" class="form-label">
+                        Apellidos
+                    </label>
+                    <input type="text"
+                           th:field="*{apellidos}"
+                           class="form-control"
+                           maxlength="100"
+                           required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="correo" class="form-label">
+                        Correo de acceso
+                    </label>
+                    <input type="email"
+                           th:field="*{correo}"
+                           class="form-control"
+                           maxlength="254"
+                           required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="numeroColegiatura" class="form-label">
+                        Número de colegiatura
+                    </label>
+                    <input type="text"
+                           th:field="*{numeroColegiatura}"
+                           class="form-control"
+                           maxlength="30"
+                           required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="telefono" class="form-label">
+                        Teléfono (opcional)
+                    </label>
+                    <input type="tel"
+                           th:field="*{telefono}"
+                           class="form-control"
+                           maxlength="20">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="password" class="form-label">
+                        Contraseña de acceso
+                    </label>
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           class="form-control"
+                           minlength="8"
+                           maxlength="72"
+                           autocomplete="new-password"
+                           required>
+
+                    <div class="form-text">
+                        Mínimo 8 caracteres.
+                        La cuenta tendrá el rol Psicólogo.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a th:href="@{/psicologos}"
+                   class="btn btn-light border">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    Guardar psicólogo
+                </button>
+            </div>
+
+        </form>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/panel :: head('Psicólogos')}"></head>
+
+<body class="mn-panel">
+<div class="mn-layout">
+
+    <aside th:replace="~{fragments/panel :: sidebar('psicologos')}"></aside>
+
+    <main class="mn-main">
+
+        <header th:replace="~{fragments/panel :: topbar('Psicólogos', 'Profesionales registrados en MenteNova.')}"></header>
+
+        <div th:if="${exito}"
+             class="alert alert-success"
+             role="status"
+             th:text="${exito}">
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">Listado de psicólogos</h2>
+
+            <a th:if="${usuarioSesion.esAdministrador()}"
+               th:href="@{/psicologos/nuevo}"
+               class="btn btn-primary">
+                Registrar psicólogo
+            </a>
+        </div>
+
+        <div class="mn-card p-3">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+
+                    <thead>
+                    <tr>
+                        <th>Nombre completo</th>
+                        <th>Correo</th>
+                        <th>Colegiatura</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="p : ${psicologos}">
+                        <td th:text="${p.usuario.nombres + ' ' + p.usuario.apellidos}"></td>
+                        <td th:text="${p.usuario.correo}"></td>
+                        <td th:text="${p.numeroColegiatura}"></td>
+                        <td th:text="${p.telefono}"></td>
+                        <td th:text="${p.activo and p.usuario.activo} ? 'Activo' : 'Inactivo'"></td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(psicologos)}">
+                        <td colspan="5"
+                            class="text-center text-secondary py-4">
+                            Todavía no hay psicólogos registrados.
+                        </td>
+                    </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+
+</body>
+</html>
