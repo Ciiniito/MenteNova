@@ -21,15 +21,17 @@ mentenova/
 │   ├── main/
 │   │   ├── java/com/mentenova/
 │   │   │   ├── MenteNovaApplication.java
-│   │   │   ├── entity/          (Usuario, Rol)
-│   │   │   ├── repository/      (UsuarioRepository, RolRepository)
-│   │   │   ├── security/        (CustomUserDetailsService, SecurityConfig)
-│   │   │   └── controller/      (LoginController)
+│   │   │   ├── controller/          (LoginController, RegistroController)
+│   │   │   ├── dto/                 (RegistroDTO)
+│   │   │   ├── entity/              (Usuario, Rol)
+│   │   │   ├── repository/          (UsuarioRepository, RolRepository)
+│   │   │   └── security/            (CustomUserDetailsService, SecurityConfig)
 │   │   └── resources/
 │   │       ├── application.properties
-│   │       ├── data.sql         (datos iniciales: roles + admin)
+│   │       ├── data.sql             (datos iniciales: roles + admin)
 │   │       ├── templates/
-│   │       │   └── login.html
+│   │       │   ├── login.html
+│   │       │   └── registro.html
 │   │       └── static/
 │   │           └── css/
 │   │               └── login.css
@@ -50,11 +52,15 @@ mentenova/
 1. Crear la base de datos en PostgreSQL:
    ```sql
    CREATE DATABASE mentenova;
-   CREATE USER mentenova_app WITH PASSWORD 'CAMBIAR_EN_ENTORNO';
+   CREATE USER mentenova_app WITH PASSWORD 'mentenova_app';
    GRANT ALL PRIVILEGES ON DATABASE mentenova TO mentenova_app;
+   GRANT USAGE ON SCHEMA public TO mentenova_app;
+   GRANT CREATE ON SCHEMA public TO mentenova_app;
+   GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mentenova_app;
+   GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mentenova_app;
    ```
 
-2. Ejecutar el script DDL del documento APF2 (`mentenova_schema.sql`) para crear tablas `rol`, `usuario`, etc.
+2. Ejecutar el script DDL completo del documento APF2 para crear tablas `rol`, `usuario`, etc.
 
 3. Editar `src/main/resources/application.properties` y configurar las credenciales de PostgreSQL.
 
@@ -62,12 +68,14 @@ mentenova/
    `src/main/resources/static/images/logo-MenteNova.jpg`
    (la imagen original está en `Imagen MenteNova/logo-MenteNova.jpg` — no se movió ni modificó).
 
-5. Ejecutar la aplicación:
+5. Generar un hash BCrypt real para el usuario administrador y reemplazarlo en `data.sql`.
+
+6. Ejecutar la aplicación:
    ```bash
    mvn spring-boot:run
    ```
 
-6. Acceder a: `http://localhost:8080/mentenova/login`
+7. Acceder a: `http://localhost:8080/mentenova/login`
 
 ## Usuario por defecto (desarrollo)
 

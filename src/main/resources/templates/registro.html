@@ -41,12 +41,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                 </div>
 
-                <!-- Errores de validación globales -->
-                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <span th:text="${#fields.globalError()}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                </div>
-
                 <form th:action="@{/registro}" method="post" th:object="${registroDTO}">
                     <div class="row g-3">
                         <div class="col-12">
