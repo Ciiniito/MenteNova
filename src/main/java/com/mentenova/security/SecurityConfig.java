@@ -11,6 +11,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -32,9 +36,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.requireCsrfProtectionMatcher(
+                        new AndRequestMatcher(
+                                CsrfFilter.DEFAULT_CSRF_MATCHER,
+                                new OrRequestMatcher(
+                                        new AntPathRequestMatcher("/psicologos/**"),
+                                        new AntPathRequestMatcher("/especialidades/**")
+                                )
+                        )
+                ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/registro/**", "/css/**", "/images/**", "/error").permitAll()
+                        .requestMatchers("/dashboard", "/dashboard/**")
+                        .hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA")
+                        .requestMatchers("/mis-citas", "/mis-citas/**").hasRole("PACIENTE")
+                        .requestMatchers("/agenda", "/agenda/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA", "PSICOLOGO")
+                        .requestMatchers("/reportes/ingresos", "/reportes/ingresos/**", "/api/reportes/ingresos", "/api/reportes/ingresos/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/reportes", "/reportes/**", "/api/reportes", "/api/reportes/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA")
+                        .requestMatchers("/mi-disponibilidad", "/psicologos/*/disponibilidad", "/psicologos/*/disponibilidad/**", "/api/disponibilidad", "/api/disponibilidad/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA")
                         .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/recepcion/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA")
                         .requestMatchers("/psicologo/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA", "PSICOLOGO")
@@ -66,7 +85,12 @@ public class SecurityConfig {
             public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                                 org.springframework.security.core.Authentication authentication)
                     throws IOException, ServletException {
-                response.sendRedirect(request.getContextPath() + "/dashboard");
+                boolean esPsicologo = authentication.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_PSICOLOGO"));
+                boolean esPaciente = authentication.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_PACIENTE"));
+                String destino = esPsicologo ? "/agenda" : (esPaciente ? "/mis-citas" : "/dashboard");
+                response.sendRedirect(request.getContextPath() + destino);
             }
         };
     }

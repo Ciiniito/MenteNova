@@ -10,6 +10,7 @@ import com.mentenova.dto.reporte.ReporteIngresosDTO;
 import com.mentenova.dto.reporte.TasasDTO;
 import com.mentenova.repository.ReporteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -25,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @Service
+@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'RECEPCIONISTA')")
 @Transactional(readOnly = true)
 public class ReporteService {
 
@@ -69,6 +71,7 @@ public class ReporteService {
                 truncado);
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ReporteIngresosDTO reporteIngresos(FiltroReporte filtro) {
         completarPeriodoMesActual(filtro);
         filtro.setMedioPago(valorPermitido(filtro.getMedioPago(), MEDIOS_PAGO));

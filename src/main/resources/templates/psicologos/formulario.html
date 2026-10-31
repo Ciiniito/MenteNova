@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/panel :: head(${edicion ? 'Editar psicólogo' : 'Registrar psicólogo'})}"></head>
+<body class="mn-panel mn-psicologos">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('psicologos')}"></aside>
+    <main class="mn-main psi-main" id="contenido">
+        <div class="psi-page-top">
+            <header th:replace="~{fragments/panel :: topbar(${edicion ? 'Editar psicólogo' : 'Registrar psicólogo'}, ${edicion ? 'Actualiza la información y el acceso del profesional.' : 'Crea una cuenta y completa los datos del profesional.'})}"></header>
+            <span class="psi-context"><span class="psi-dot"></span> Equipo clínico</span>
+        </div>
+        <a th:href="@{/psicologos}" class="psi-back"><i class="bi bi-arrow-left" aria-hidden="true"></i> Volver al directorio</a>
+        <div class="psi-section-heading psi-section-heading--form">
+            <div>
+                <p class="psi-eyebrow" th:text="${edicion} ? 'ADMINISTRACIÓN DEL EQUIPO' : 'NUEVO PROFESIONAL'">NUEVO PROFESIONAL</p>
+                <h2 th:text="${edicion} ? 'Datos del profesional' : 'Sumemos talento a tu equipo.'">Datos del profesional</h2>
+                <p th:text="${edicion} ? 'Revisa la información y guarda tus cambios.' : 'Completa los campos para registrar al psicólogo.'"></p>
+            </div>
+        </div>
+        <div class="psi-form-layout">
+            <form th:action="${edicion} ? @{/psicologos/{id}/actualizar(id=${psicologoId})} : @{/psicologos/guardar}" th:object="${psicologoForm}" method="post"
+                  class="psi-form" data-professional-form>
+                <div class="psi-form__intro">
+                    <h3 th:text="${edicion} ? 'Editar ficha' : 'Ficha de registro'">Ficha de registro</h3>
+                    <span th:text="${edicion} ? 'El teléfono y la nueva contraseña son opcionales.' : 'Todos los campos son obligatorios, salvo teléfono.'"></span>
+                </div>
+                <div th:if="${#fields.hasAnyErrors()}" class="psi-alert psi-alert--error psi-form__errors"
+                     role="alert" tabindex="-1" data-error-summary>
+                    <div>
+                        <strong>Revisa los datos antes de continuar</strong>
+                        <ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul>
+                        <p th:text="${edicion} ? 'Si deseas cambiar la contraseña, vuelve a escribirla.' : 'Vuelve a escribir la contraseña para reintentar.'"></p>
+                    </div>
+                </div>
+                <section class="psi-form-section" aria-labelledby="seccion-01">
+                    <h3 id="seccion-01"><span class="psi-step">01</span> Datos personales</h3>
+                    <div class="psi-fields">
+                        <div class="psi-field">
+                            <label for="nombres">Nombres</label>
+                            <input type="text" th:field="*{nombres}" th:errorclass="is-invalid" maxlength="80"
+                                   autocomplete="given-name" placeholder="Ej. Ana María" required
+                                   aria-describedby="error-nombres" th:attr="aria-invalid=${#fields.hasErrors('nombres')}">
+                            <small id="error-nombres" class="psi-field-error" th:errors="*{nombres}"></small>
+                        </div>
+                        <div class="psi-field">
+                            <label for="apellidos">Apellidos</label>
+                            <input type="text" th:field="*{apellidos}" th:errorclass="is-invalid" maxlength="100"
+                                   autocomplete="family-name" placeholder="Ej. Pérez Ramírez" required
+                                   aria-describedby="error-apellidos" th:attr="aria-invalid=${#fields.hasErrors('apellidos')}">
+                            <small id="error-apellidos" class="psi-field-error" th:errors="*{apellidos}"></small>
+                        </div>
+                        <div class="psi-field psi-field--wide">
+                            <label for="telefono">Teléfono <span class="psi-optional">Opcional</span></label>
+                            <input type="tel" th:field="*{telefono}" th:errorclass="is-invalid" maxlength="20"
+                                   autocomplete="tel" placeholder="Ej. 999 123 456" aria-describedby="error-telefono"
+                                   th:attr="aria-invalid=${#fields.hasErrors('telefono')}">
+                            <small id="error-telefono" class="psi-field-error" th:errors="*{telefono}"></small>
+                        </div>
+                    </div>
+                </section>
+                <section class="psi-form-section" aria-labelledby="seccion-02">
+                    <h3 id="seccion-02"><span class="psi-step">02</span> Información profesional</h3>
+                    <div class="psi-field">
+                        <label for="numeroColegiatura">Número de colegiatura</label>
+                        <input type="text" th:field="*{numeroColegiatura}" th:errorclass="is-invalid" maxlength="30"
+                               placeholder="Ingresa el número de colegiatura" required
+                               aria-describedby="colegiatura-ayuda error-colegiatura"
+                               th:attr="aria-invalid=${#fields.hasErrors('numeroColegiatura')}">
+                        <small id="colegiatura-ayuda" class="psi-field-help">Debe ser único para cada profesional.</small>
+                        <small id="error-colegiatura" class="psi-field-error" th:errors="*{numeroColegiatura}"></small>
+                    </div>
+                </section>
+                <section class="psi-form-section" aria-labelledby="seccion-03">
+                    <h3 id="seccion-03"><span class="psi-step">03</span> Acceso a MenteNova</h3>
+                    <div class="psi-fields">
+                        <div class="psi-field psi-field--wide">
+                            <label for="correo">Correo de acceso</label>
+                            <input type="email" th:field="*{correo}" th:errorclass="is-invalid" maxlength="254"
+                                   autocomplete="off" spellcheck="false" autocapitalize="none"
+                                   placeholder="nombre@correo.com" required aria-describedby="correo-ayuda error-correo"
+                                   th:attr="aria-invalid=${#fields.hasErrors('correo')}">
+                            <small id="correo-ayuda" class="psi-field-help">El profesional usará este correo para iniciar sesión.</small>
+                            <small id="error-correo" class="psi-field-error" th:errors="*{correo}"></small>
+                        </div>
+                        <div class="psi-field psi-field--wide">
+                            <label for="password" th:text="${edicion} ? 'Nueva contraseña (opcional)' : 'Contraseña'">Contraseña</label>
+                            <div class="psi-password">
+                                <input type="password" id="password" name="password" minlength="8" maxlength="72"
+                                       autocomplete="new-password" th:placeholder="${edicion} ? 'Déjala vacía para conservar la actual' : 'Mínimo 8 caracteres'" th:required="${!edicion}"
+                                       aria-describedby="password-ayuda error-password"
+                                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                       th:attr="aria-invalid=${#fields.hasErrors('password')}">
+                                <button type="button" class="psi-password__toggle" data-toggle-password hidden
+                                        aria-controls="password" aria-label="Mostrar contraseña" aria-pressed="false">
+                                    <i class="bi bi-eye" aria-hidden="true"></i><span>Mostrar</span>
+                                </button>
+                            </div>
+                            <small id="password-ayuda" class="psi-field-help" th:text="${edicion} ? 'Solo se cambiará si escribes una nueva contraseña de al menos 8 caracteres.' : 'Usa al menos 8 caracteres.'"></small>
+                            <small id="error-password" class="psi-field-error" th:errors="*{password}"></small>
+                        </div>
+                    </div>
+                </section>
+                <section class="psi-form-section" th:if="${edicion}" aria-labelledby="seccion-04">
+                    <h3 id="seccion-04"><span class="psi-step">04</span> Estado de la cuenta</h3>
+                    <div class="psi-field">
+                        <label for="activo">Estado</label>
+                        <select th:field="*{activo}" th:errorclass="is-invalid" required
+                                aria-describedby="estado-ayuda error-activo"
+                                th:attr="aria-invalid=${#fields.hasErrors('activo')}" data-account-state>
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                        <small id="estado-ayuda" class="psi-field-help">Una cuenta inactiva no podrá iniciar sesión. Sus registros se conservarán.</small>
+                        <small id="error-activo" class="psi-field-error" th:errors="*{activo}"></small>
+                    </div>
+                </section>
+                <div class="psi-form-actions">
+                    <a th:href="@{/psicologos}" class="psi-button psi-button--secondary"><i class="bi bi-x-lg" aria-hidden="true"></i> <span>Cancelar</span></a>
+                    <button type="submit" class="psi-button psi-button--primary">
+                        <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                        <span th:text="${edicion} ? 'Guardar cambios' : 'Guardar psicólogo'">Guardar psicólogo</span>
+                    </button>
+                </div>
+            </form>
+            <aside class="psi-account" aria-labelledby="titulo-cuenta">
+                <p class="psi-eyebrow" id="titulo-cuenta">VISTA DE LA CUENTA</p>
+                <div class="psi-account__profile">
+                    <span class="psi-avatar psi-avatar--large" data-preview-initials aria-hidden="true">NP</span>
+                    <h3 data-preview-name>Nuevo profesional</h3>
+                    <p data-preview-email>Su correo aparecerá aquí</p>
+                    <span class="psi-role"><i class="bi bi-person-badge" aria-hidden="true"></i> Psicólogo</span>
+                </div>
+                <dl class="psi-account__details">
+                    <div><dt>Colegiatura</dt><dd data-preview-license>Por completar</dd></div>
+                    <div><dt th:text="${edicion} ? 'Estado' : 'Estado inicial'">Estado</dt><dd>
+                        <span class="psi-badge" data-preview-state
+                              th:classappend="${!edicion or psicologoForm.activo == true} ? 'psi-badge--active' : 'psi-badge--inactive'">
+                            <span class="psi-dot" aria-hidden="true"></span>
+                            <span data-preview-state-text th:text="${!edicion or psicologoForm.activo == true} ? 'Activo' : 'Inactivo'">Activo</span>
+                        </span>
+                    </dd></div>
+                </dl>
+                <div class="psi-account__note">
+                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                    <p th:text="${edicion} ? 'Los cambios se aplicarán a la ficha profesional y a su cuenta de acceso.' : 'Al guardar, el profesional podrá ingresar con el correo y la contraseña que registres.'"></p>
+                </div>
+            </aside>
+        </div>
+        <footer class="psi-page-footer">MenteNova <span aria-hidden="true">·</span> Centro Psicológico</footer>
+    </main>
+</div>
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+<script th:src="@{/js/psicologos.js}" defer></script>
+</body>
+</html>

@@ -14,6 +14,7 @@
           integrity="sha384-sAjZvrYXacB9bJ0LVUOAvlGp7N5A9s6krO+1oZ2bSc1hG7q3UpoTU50kWYTKDOQC"
           crossorigin="anonymous"/>
     <link th:href="@{/css/panel.css}" rel="stylesheet"/>
+    <link th:href="@{/css/psicologos.css}" rel="stylesheet"/>
 </head>
 <body>
 
@@ -24,7 +25,7 @@
        aria-label="Menú principal">
     <div class="mn-sidebar__inner">
         <div class="mn-sidebar__brand">
-            <a th:href="@{/dashboard}" class="mn-brand">
+            <a th:href="@{/inicio}" class="mn-brand">
                 <svg width="38" height="38" viewBox="0 0 48 48" aria-hidden="true">
                     <circle cx="24" cy="24" r="21" fill="#efecfc" stroke="#a99cf0" stroke-width="2.5"/>
                     <polyline points="14,32 19,16 24,27 29,16 34,32" fill="none" stroke="#5b47c7"
@@ -40,27 +41,33 @@
         </div>
 
         <nav class="mn-nav" th:with="esPersonal=${usuarioSesion != null and usuarioSesion.esPersonal()}">
-            <a th:href="@{/dashboard}" class="mn-nav__link"
+            <a th:if="${usuarioSesion != null and usuarioSesion.puedeVerReportes()}"
+               th:href="@{/dashboard}" class="mn-nav__link"
                th:classappend="${activo == 'dashboard'} ? 'active'"
                th:attr="aria-current=${activo == 'dashboard' ? 'page' : null}">
                 <i class="bi bi-grid-1x2" aria-hidden="true"></i>
-                <span th:text="${esPersonal} ? 'Dashboard' : 'Inicio'">Dashboard</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a th:if="${usuarioSesion != null and usuarioSesion.rol == 'PACIENTE'}"
+               th:href="@{/mis-citas}" class="mn-nav__link"
+               th:classappend="${activo == 'mis-citas'} ? 'active'"
+               th:attr="aria-current=${activo == 'mis-citas' ? 'page' : null}">
+                <i class="bi bi-calendar-check" aria-hidden="true"></i><span>Mis próximas citas</span>
             </a>
 
             <th:block th:if="${esPersonal}">
-                <span class="mn-nav__link disabled" aria-disabled="true">
-                    <i class="bi bi-calendar3" aria-hidden="true"></i><span>Agenda</span>
-                    <small class="mn-nav__pronto">Pronto</small>
-                </span>
+                <a th:href="@{/agenda}" class="mn-nav__link" th:classappend="${activo == 'agenda'} ? 'active'"><i class="bi bi-calendar3" aria-hidden="true"></i><span>Agenda</span></a>
                 <th:block th:if="${usuarioSesion.rol != 'PSICOLOGO'}">
                     <a th:href="@{/pacientes}" class="mn-nav__link"
                        th:classappend="${activo == 'pacientes'} ? 'active'">
                         <i class="bi bi-people" aria-hidden="true"></i><span>Pacientes</span>
                     </a>
-                    <span class="mn-nav__link disabled" aria-disabled="true">
+                    <a th:href="@{/psicologos}" class="mn-nav__link"
+                       th:classappend="${activo == 'psicologos'} ? 'active'">
                         <i class="bi bi-person-badge" aria-hidden="true"></i><span>Psicólogos</span>
-                        <small class="mn-nav__pronto">Pronto</small>
-                    </span>
+                    </a>
+                    <a th:if="${usuarioSesion.esAdministrador()}" th:href="@{/especialidades}" class="mn-nav__link" th:classappend="${activo == 'especialidades'} ? 'active'"><i class="bi bi-tags" aria-hidden="true"></i><span>Especialidades</span></a>
                     <span class="mn-nav__link disabled" aria-disabled="true">
                         <i class="bi bi-credit-card" aria-hidden="true"></i><span>Pagos</span>
                         <small class="mn-nav__pronto">Pronto</small>
@@ -136,7 +143,7 @@
     <button type="submit" class="btn btn-primary">
         <i class="bi bi-funnel" aria-hidden="true"></i> Aplicar
     </button>
-    <a th:href="${urlLimpiar}" class="btn btn-light border">Limpiar</a>
+    <a th:href="${urlLimpiar}" class="btn btn-light border"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <span>Limpiar</span></a>
     <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
         <i class="bi bi-printer" aria-hidden="true"></i> Imprimir / PDF
     </button>

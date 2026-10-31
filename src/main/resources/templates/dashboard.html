@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       lang="es">
-<head th:replace="~{fragments/panel :: head('Dashboard')}"></head>
+<head th:replace="~{fragments/panel :: head(${usuarioSesion.rol == 'PACIENTE' ? 'Mis próximas citas' : 'Dashboard'})}"></head>
 <body class="mn-panel">
 <div class="mn-layout">
-    <aside th:replace="~{fragments/panel :: sidebar('dashboard')}"></aside>
+    <aside th:replace="~{fragments/panel :: sidebar(${usuarioSesion.rol == 'PACIENTE' ? 'mis-citas' : 'dashboard'})}"></aside>
 
     <main class="mn-main"
           th:with="d=${dashboard},
@@ -26,7 +26,18 @@
                 <i class="bi bi-calendar-x" aria-hidden="true"></i>
                 No tienes citas programadas.
             </div>
-            <div class="table-responsive" th:unless="${#lists.isEmpty(d.proximasCitas)}">
+            <div class="d-md-none" th:unless="${#lists.isEmpty(d.proximasCitas)}">
+                <article th:each="c : ${d.proximasCitas}" class="p-3 border-bottom" aria-label="Próxima cita">
+                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                        <strong class="text-nowrap"><i class="bi bi-calendar-event me-1" aria-hidden="true"></i><time th:datetime="${c.fecha}" th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}"></time></strong>
+                        <span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}" th:text="${c.estadoNombre}"></span>
+                    </div>
+                    <p class="small mb-2 text-nowrap"><i class="bi bi-clock me-2" aria-hidden="true"></i><span th:text="${#temporals.format(c.horaInicio, 'HH:mm')} + ' – ' + ${#temporals.format(c.horaFin, 'HH:mm')}"></span></p>
+                    <p class="small mb-2"><i class="bi bi-person me-2" aria-hidden="true"></i><span th:text="${c.psicologo}"></span></p>
+                    <span th:replace="~{fragments/panel :: modalidad(${c.modalidad})}"></span>
+                </article>
+            </div>
+            <div class="table-responsive d-none d-md-block" th:unless="${#lists.isEmpty(d.proximasCitas)}">
                 <table class="table mn-table">
                     <thead>
                     <tr>
@@ -192,7 +203,7 @@
                             </table>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="mn-nota"><span class="mn-cal__punto d-inline-block align-middle me-1"></span>Días con citas</span>
-                                <a th:href="@{/dashboard(desde=${d.desde}, hasta=${d.hasta})}" class="btn btn-sm btn-light border">Hoy</a>
+                                <a th:href="@{/dashboard(desde=${d.desde}, hasta=${d.hasta})}" class="btn btn-sm btn-light border"><i class="bi bi-calendar-event" aria-hidden="true"></i> <span>Hoy</span></a>
                             </div>
                         </div>
                     </section>
@@ -211,7 +222,7 @@
                     </div>
                     <nav class="mn-presets" aria-label="Periodos rápidos">
                         <a th:href="@{/dashboard(desde=${hoy}, hasta=${hoy})}"
-                           th:classappend="${d.desde == hoy and d.hasta == hoy} ? 'active'">Hoy</a>
+                           th:classappend="${d.desde == hoy and d.hasta == hoy} ? 'active'"><i class="bi bi-calendar-event" aria-hidden="true"></i> <span>Hoy</span></a>
                         <a th:href="@{/dashboard(desde=${lunes}, hasta=${lunes.plusDays(6)})}"
                            th:classappend="${d.desde == lunes and d.hasta == lunes.plusDays(6)} ? 'active'">Esta semana</a>
                         <a th:href="@{/dashboard(desde=${hoy.withDayOfMonth(1)}, hasta=${hoy.withDayOfMonth(hoy.lengthOfMonth())})}"
@@ -232,7 +243,7 @@
                             <input type="date" id="hasta" name="hasta" class="form-control form-control-sm" th:value="${d.hasta}" required/>
                         </div>
                         <div class="col-12 col-md-auto">
-                            <button type="submit" class="btn btn-sm btn-primary">Consultar periodo</button>
+                            <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-search" aria-hidden="true"></i> <span>Consultar periodo</span></button>
                         </div>
                     </form>
 
