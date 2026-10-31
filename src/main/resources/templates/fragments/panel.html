@@ -48,10 +48,12 @@
             </a>
 
             <th:block th:if="${esPersonal}">
-                <span class="mn-nav__link disabled" aria-disabled="true">
-                    <i class="bi bi-calendar3" aria-hidden="true"></i><span>Agenda</span>
-                    <small class="mn-nav__pronto">Pronto</small>
-                </span>
+              <a th:href="@{/citas}" class="mn-nav__link"
+                th:classappend="${activo == 'citas'} ? 'active'"
+                th:attr="aria-current=${activo == 'citas' ? 'page' : null}">
+                    <i class="bi bi-calendar3" aria-hidden="true"></i>
+                    <span>Gestión de Citas</span>
+                </a>
                 <th:block th:if="${usuarioSesion.rol != 'PSICOLOGO'}">
                     <span class="mn-nav__link disabled" aria-disabled="true">
                         <i class="bi bi-people" aria-hidden="true"></i><span>Pacientes</span>

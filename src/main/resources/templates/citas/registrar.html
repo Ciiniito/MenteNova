@@ -1,51 +1,136 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Registrar Cita</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head th:replace="~{fragments/panel :: head('Registrar Cita')}"></head>
+
 <body>
 
-<div class="container mt-4">
+<aside th:replace="~{fragments/panel :: sidebar('citas')}"></aside>
 
-    <h1>Registrar Cita</h1>
+<main class="ms-lg-5 p-4">
 
-    <form>
+    <header th:replace="~{fragments/panel :: topbar(
+            'Registrar Cita',
+            'Nueva cita psicológica')}">
+    </header>
 
-        <div class="mb-3">
-            <label>Fecha</label>
-            <input type="date"
-                   class="form-control">
+    <div class="container-fluid">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+                <form>
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Paciente
+                            </label>
+
+                            <input type="text"
+                                   class="form-control">
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Psicólogo
+                            </label>
+
+                            <input type="text"
+                                   class="form-control">
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Fecha
+                            </label>
+
+                            <input type="date"
+                                   class="form-control">
+
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+
+                            <label class="form-label">
+                                Hora Inicio
+                            </label>
+
+                            <input type="time"
+                                   class="form-control">
+
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+
+                            <label class="form-label">
+                                Hora Fin
+                            </label>
+
+                            <input type="time"
+                                   class="form-control">
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Modalidad
+                            </label>
+
+                            <select class="form-select">
+
+                                <option>PRESENCIAL</option>
+                                <option>VIRTUAL</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+
+                            <label class="form-label">
+                                Observación
+                            </label>
+
+                            <textarea rows="4"
+                                      class="form-control"></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <button class="btn btn-primary">
+
+                        Guardar Cita
+
+                    </button>
+
+                    <a th:href="@{/citas}"
+                       class="btn btn-secondary">
+
+                        Volver
+
+                    </a>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label>Hora Inicio</label>
-            <input type="time"
-                   class="form-control">
-        </div>
+    </div>
 
-        <div class="mb-3">
-            <label>Hora Fin</label>
-            <input type="time"
-                   class="form-control">
-        </div>
+</main>
 
-        <div class="mb-3">
-            <label>Modalidad</label>
-
-            <select class="form-control">
-                <option>PRESENCIAL</option>
-                <option>VIRTUAL</option>
-            </select>
-        </div>
-
-        <button class="btn btn-success">
-            Guardar
-        </button>
-
-    </form>
-
-</div>
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
 
 </body>
 </html>

@@ -20,7 +20,7 @@ public class Cita {
     private Long idPsicologo;
 
     @Column(name = "id_estado_cita")
-    private Integer idEstadoCita;
+    private Short idEstadoCita;
 
     @Column(name = "fecha")
     private LocalDate fecha;
@@ -67,11 +67,11 @@ public class Cita {
         this.idPsicologo = idPsicologo;
     }
 
-    public Integer getIdEstadoCita() {
+    public Short getIdEstadoCita() {
         return idEstadoCita;
     }
 
-    public void setIdEstadoCita(Integer idEstadoCita) {
+    public void setIdEstadoCita(Short idEstadoCita) {
         this.idEstadoCita = idEstadoCita;
     }
 

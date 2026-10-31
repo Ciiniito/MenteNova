@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head th:replace="~{fragments/panel :: head('Gestión de Citas')}">
+</head>
+
+<body>
+
+<div class="d-flex">
+
+    <!-- Sidebar -->
+    <aside th:replace="~{fragments/panel :: sidebar('citas')}"></aside>
+
+    <!-- Contenido -->
+    <div class="flex-grow-1">
+
+        <!-- Topbar -->
+        <header th:replace="~{fragments/panel :: topbar(
+                'Gestión de Citas',
+                'Administración de citas psicológicas')}">
+        </header>
+
+        <div class="container-fluid px-4 pb-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <!-- Encabezado -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+
+                        <div>
+                            <h2 class="fw-bold mb-1">
+                                Gestión de Citas
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                Registro, consulta y administración de citas
+                            </p>
+                        </div>
+
+                        <a th:href="@{/citas/nueva}"
+                           class="btn btn-primary">
+
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Nueva Cita
+
+                        </a>
+
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-lg-3 col-md-6">
+                            <input type="date"
+                                   class="form-control">
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+
+                            <select class="form-select">
+
+                                <option>Todos los estados</option>
+                                <option>PENDIENTE</option>
+                                <option>CONFIRMADA</option>
+                                <option>ATENDIDA</option>
+                                <option>CANCELADA</option>
+                                <option>REPROGRAMADA</option>
+                                <option>NO ASISTIO</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Buscar paciente">
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+
+                            <button class="btn btn-outline-primary w-100">
+                                Buscar
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Tabla -->
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead class="table-light">
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                                <th>Paciente</th>
+                                <th>Psicólogo</th>
+                                <th>Modalidad</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                            <tr th:each="cita : ${citas}">
+
+                                <td th:text="${cita.id}"></td>
+
+                                <td th:text="${cita.fecha}"></td>
+
+                                <td th:text="${cita.horaInicio}"></td>
+
+                                <td th:text="${cita.horaFin}"></td>
+
+                                <td th:text="${cita.idPaciente}"></td>
+
+                                <td th:text="${cita.idPsicologo}"></td>
+
+                                <td th:text="${cita.modalidad}"></td>
+
+                                <td>
+
+                                    <span class="badge bg-primary"
+                                          th:text="${cita.idEstadoCita}">
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <button class="btn btn-sm btn-success me-1">
+                                        Confirmar
+                                    </button>
+
+                                    <button class="btn btn-sm btn-warning text-white me-1">
+                                        Reprogramar
+                                    </button>
+
+                                    <button class="btn btn-sm btn-danger">
+                                        Cancelar
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                            <tr th:if="${#lists.isEmpty(citas)}">
+
+                                <td colspan="9" class="text-center text-muted py-4">
+
+                                    No existen citas registradas
+
+                                </td>
+
+                            </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}">
+</th:block>
+
+</body>
+
+</html>
