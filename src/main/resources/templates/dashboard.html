@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       lang="es">
-<head th:replace="~{fragments/panel :: head('Dashboard')}"></head>
+<head th:replace="~{fragments/panel :: head(${usuarioSesion.rol == 'PACIENTE' ? 'Mis próximas citas' : 'Dashboard'})}"></head>
 <body class="mn-panel">
 <div class="mn-layout">
-    <aside th:replace="~{fragments/panel :: sidebar('dashboard')}"></aside>
+    <aside th:replace="~{fragments/panel :: sidebar(${usuarioSesion.rol == 'PACIENTE' ? 'mis-citas' : 'dashboard'})}"></aside>
 
     <main class="mn-main"
           th:with="d=${dashboard},
@@ -26,7 +26,18 @@
                 <i class="bi bi-calendar-x" aria-hidden="true"></i>
                 No tienes citas programadas.
             </div>
-            <div class="table-responsive" th:unless="${#lists.isEmpty(d.proximasCitas)}">
+            <div class="d-md-none" th:unless="${#lists.isEmpty(d.proximasCitas)}">
+                <article th:each="c : ${d.proximasCitas}" class="p-3 border-bottom" aria-label="Próxima cita">
+                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                        <strong class="text-nowrap"><i class="bi bi-calendar-event me-1" aria-hidden="true"></i><time th:datetime="${c.fecha}" th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}"></time></strong>
+                        <span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}" th:text="${c.estadoNombre}"></span>
+                    </div>
+                    <p class="small mb-2 text-nowrap"><i class="bi bi-clock me-2" aria-hidden="true"></i><span th:text="${#temporals.format(c.horaInicio, 'HH:mm')} + ' – ' + ${#temporals.format(c.horaFin, 'HH:mm')}"></span></p>
+                    <p class="small mb-2"><i class="bi bi-person me-2" aria-hidden="true"></i><span th:text="${c.psicologo}"></span></p>
+                    <span th:replace="~{fragments/panel :: modalidad(${c.modalidad})}"></span>
+                </article>
+            </div>
+            <div class="table-responsive d-none d-md-block" th:unless="${#lists.isEmpty(d.proximasCitas)}">
                 <table class="table mn-table">
                     <thead>
                     <tr>

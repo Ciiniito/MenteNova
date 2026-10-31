@@ -7,6 +7,7 @@ import com.mentenova.dto.dashboard.DiaCalendarioDTO;
 import com.mentenova.dto.reporte.CitaReporteDTO;
 import com.mentenova.dto.reporte.FiltroReporte;
 import com.mentenova.repository.ReporteRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -40,6 +41,7 @@ public class DashboardService {
         this.reloj = reloj;
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'RECEPCIONISTA', 'PACIENTE')")
     public DashboardDTO construir(UsuarioSesionDTO usuario, LocalDate desde, LocalDate hasta, YearMonth mes) {
         LocalDate hoy = LocalDate.now(reloj);
         LocalTime ahora = LocalTime.now(reloj);
@@ -55,14 +57,6 @@ public class DashboardService {
 
         String alcance = DashboardDTO.ALCANCE_GENERAL;
         Long idPsicologo = null;
-        if (UsuarioSesionDTO.PSICOLOGO.equals(usuario.rol())) {
-            alcance = DashboardDTO.ALCANCE_PSICOLOGO;
-            Optional<Long> encontrado = reporteRepository.buscarIdPsicologo(usuario.idUsuario());
-            if (encontrado.isEmpty()) {
-                return new DashboardDTO(alcance, false, hoy, null, List.of(), null, null, null, null);
-            }
-            idPsicologo = encontrado.get();
-        }
 
         YearMonth mesActual = YearMonth.from(hoy);
         FiltroReporte periodo = new FiltroReporte(desde, hasta, idPsicologo);

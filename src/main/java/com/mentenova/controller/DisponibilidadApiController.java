@@ -8,7 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/disponibilidad")
-@PreAuthorize("hasAnyRole('ADMINISTRADOR','RECEPCIONISTA','PSICOLOGO')")
+@PreAuthorize("hasAnyRole('ADMINISTRADOR','RECEPCIONISTA')")
 public class DisponibilidadApiController {
     private final DisponibilidadService servicio;
     public DisponibilidadApiController(DisponibilidadService servicio){this.servicio=servicio;}

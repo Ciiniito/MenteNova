@@ -16,16 +16,13 @@ import java.time.*;
 import java.util.List;
 
 @Controller
-@PreAuthorize("hasAnyRole('ADMINISTRADOR','RECEPCIONISTA','PSICOLOGO')")
+@PreAuthorize("hasAnyRole('ADMINISTRADOR','RECEPCIONISTA')")
 public class DisponibilidadController {
     private final DisponibilidadService servicio;
     private final AccesoPsicologoService acceso;
     private final UsuarioSesionService sesiones;
     private final Clock reloj;
     public DisponibilidadController(DisponibilidadService servicio,AccesoPsicologoService acceso,UsuarioSesionService sesiones,Clock reloj) {this.servicio=servicio;this.acceso=acceso;this.sesiones=sesiones;this.reloj=reloj;}
-    @GetMapping("/mi-disponibilidad")
-    @PreAuthorize("hasRole('PSICOLOGO')")
-    public String propia() {return ruta(acceso.propio());}
     @GetMapping("/psicologos/{id}/disponibilidad")
     public String pantalla(@PathVariable("id")Long id,@RequestParam(value="horarioId",required=false)Long horarioId,
             @RequestParam(value="excepcionId",required=false)Long excepcionId,
@@ -37,7 +34,7 @@ public class DisponibilidadController {
         cargar(id,auth,model,fecha,modalidad);return "disponibilidad/horarios";
     }
     @PostMapping("/psicologos/{id}/disponibilidad/horarios/guardar")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String guardarHorario(@PathVariable("id")Long id,@RequestParam(value="horarioId",required=false)Long horarioId,
             @Valid @ModelAttribute("horarioForm")HorarioForm form,BindingResult errores,Authentication auth,Model model,RedirectAttributes flash) {
         // Incluso con datos inválidos, se verifica la propiedad del profesional solicitado.
@@ -49,7 +46,7 @@ public class DisponibilidadController {
         cargar(id,auth,model,null,Modalidad.PRESENCIAL);return "disponibilidad/horarios";
     }
     @PostMapping("/psicologos/{id}/disponibilidad/excepciones/guardar")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String guardarExcepcion(@PathVariable("id")Long id,@RequestParam(value="excepcionId",required=false)Long excepcionId,
             @Valid @ModelAttribute("excepcionForm")ExcepcionForm form,BindingResult errores,Authentication auth,Model model,RedirectAttributes flash) {
         acceso.consultar(id);
@@ -59,7 +56,7 @@ public class DisponibilidadController {
         cargar(id,auth,model,null,Modalidad.PRESENCIAL);return "disponibilidad/horarios";
     }
     @GetMapping("/psicologos/{id}/disponibilidad/{tipo:horarios|excepciones}/{registroId}/eliminar")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String confirmar(@PathVariable("id")Long id,@PathVariable("tipo")String tipo,@PathVariable("registroId")Long registroId,Authentication auth,Model model) {
         acceso.modificar(id);model.addAttribute("usuarioSesion",sesiones.requerir(auth));model.addAttribute("psicologo",servicio.profesional(id));
         model.addAttribute("tipo",tipo);model.addAttribute("registroId",registroId);
@@ -67,7 +64,7 @@ public class DisponibilidadController {
         return "disponibilidad/eliminar";
     }
     @PostMapping("/psicologos/{id}/disponibilidad/{tipo:horarios|excepciones}/{registroId}/eliminar")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String eliminar(@PathVariable("id")Long id,@PathVariable("tipo")String tipo,@PathVariable("registroId")Long registroId,RedirectAttributes flash) {
         try {if(tipo.equals("horarios"))servicio.eliminarHorario(id,registroId);else servicio.eliminarExcepcion(id,registroId);flash.addFlashAttribute("exito","Registro eliminado correctamente.");}
         catch(IllegalArgumentException ex){flash.addFlashAttribute("error",ex.getMessage());}
@@ -76,7 +73,7 @@ public class DisponibilidadController {
     private void cargar(Long id,Authentication auth,Model model,LocalDate fecha,Modalidad modalidad) {
         var usuario=sesiones.requerir(auth);var p=servicio.profesional(id);
         model.addAttribute("usuarioSesion",usuario);model.addAttribute("psicologo",p);
-        model.addAttribute("puedeEditar",!usuario.rol().equals("RECEPCIONISTA")&&Boolean.TRUE.equals(p.getActivo())&&Boolean.TRUE.equals(p.getUsuario().getActivo()));
+        model.addAttribute("puedeEditar",usuario.esAdministrador()&&Boolean.TRUE.equals(p.getActivo())&&Boolean.TRUE.equals(p.getUsuario().getActivo()));
         model.addAttribute("horarios",servicio.horarios(id));model.addAttribute("excepciones",servicio.excepciones(id));
         model.addAttribute("dias",List.of("Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"));
         LocalDate dia=fecha==null?LocalDate.now(reloj):fecha;

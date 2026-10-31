@@ -10,7 +10,7 @@
         <header th:replace="~{fragments/panel :: topbar('Reportes', 'Reportes administrativos generados desde la agenda centralizada.')}"></header>
 
         <div class="row g-4">
-            <div class="col-md-6 col-xl-4">
+            <div class="col-md-6" th:classappend="${usuarioSesion.puedeVerIngresos()} ? 'col-xl-4'">
                 <a th:href="@{/reportes/citas}" class="mn-card d-block h-100 p-4 text-decoration-none text-reset">
                     <div class="mn-kpi__icon mn-tone--primary mb-3"><i class="bi bi-calendar2-week" aria-hidden="true"></i></div>
                     <span class="badge text-bg-light border mb-2">Operativo</span>
@@ -23,8 +23,8 @@
                 </a>
             </div>
 
-            <div class="col-md-6 col-xl-4">
-                <a th:if="${usuarioSesion.puedeVerIngresos()}" th:href="@{/reportes/ingresos}"
+            <div th:if="${usuarioSesion.puedeVerIngresos()}" class="col-md-6 col-xl-4">
+                <a th:href="@{/reportes/ingresos}"
                    class="mn-card d-block h-100 p-4 text-decoration-none text-reset">
                     <div class="mn-kpi__icon mn-tone--CONFIRMADA mb-3"><i class="bi bi-cash-stack" aria-hidden="true"></i></div>
                     <span class="badge text-bg-light border mb-2">Financiero</span>
@@ -35,15 +35,9 @@
                     </p>
                     <p class="mn-nota mb-0">Filtros: periodo, psicólogo, medio y estado de pago.</p>
                 </a>
-                <div th:unless="${usuarioSesion.puedeVerIngresos()}" class="mn-card h-100 p-4 opacity-75">
-                    <div class="mn-kpi__icon mn-tone--NO_ASISTIO mb-3"><i class="bi bi-lock" aria-hidden="true"></i></div>
-                    <span class="badge text-bg-light border mb-2">Financiero</span>
-                    <h2 class="h5 fw-semibold">Ingresos por método de pago</h2>
-                    <p class="text-secondary small mb-0">Disponible solo para el Administrador.</p>
-                </div>
             </div>
 
-            <div class="col-md-6 col-xl-4">
+            <div class="col-md-6" th:classappend="${usuarioSesion.puedeVerIngresos()} ? 'col-xl-4'">
                 <a th:href="@{/reportes/inasistencias}" class="mn-card d-block h-100 p-4 text-decoration-none text-reset">
                     <div class="mn-kpi__icon mn-tone--serie1 mb-3"><i class="bi bi-graph-up" aria-hidden="true"></i></div>
                     <span class="badge text-bg-light border mb-2">Gerencial</span>

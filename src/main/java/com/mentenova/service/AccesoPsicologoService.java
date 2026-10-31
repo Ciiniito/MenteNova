@@ -38,7 +38,7 @@ public class AccesoPsicologoService {
         return psicologos.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"El psicólogo no existe."));
     }
     public Psicologo modificar(Long id) {
-        if(actual().getRol().getNombre().equals("RECEPCIONISTA")) throw new AccessDeniedException("Solo tienes permiso de consulta.");
+        if(!actual().getRol().getNombre().equals("ADMINISTRADOR")) throw new AccessDeniedException("Solo el administrador puede modificar la disponibilidad.");
         var p=consultar(id);
         if(!Boolean.TRUE.equals(p.getActivo()) || !Boolean.TRUE.equals(p.getUsuario().getActivo()))
             throw new IllegalArgumentException("Activa al psicólogo antes de modificar su disponibilidad.");

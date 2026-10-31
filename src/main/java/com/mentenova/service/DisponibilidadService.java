@@ -12,7 +12,7 @@ import java.time.*;
 import java.util.*;
 
 @Service
-@PreAuthorize("hasAnyRole('ADMINISTRADOR','RECEPCIONISTA','PSICOLOGO')")
+@PreAuthorize("hasAnyRole('ADMINISTRADOR','RECEPCIONISTA')")
 public class DisponibilidadService {
     private final AccesoPsicologoService acceso;
     private final PsicologoRepository psicologos;
@@ -45,7 +45,7 @@ public class DisponibilidadService {
         f.setFecha(e.getFecha());f.setHoraInicio(e.getHoraInicio());f.setHoraFin(e.getHoraFin());f.setTipo(e.getTipo());f.setMotivo(e.getMotivo());return f;
     }
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public void guardarHorario(Long id,Long horarioId,HorarioForm f) {
         acceso.modificar(id);var p=psicologos.bloquearPorId(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         validarHoras(f.getHoraInicio(),f.getHoraFin());
@@ -64,7 +64,7 @@ public class DisponibilidadService {
         horarios.saveAndFlush(h);
     }
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public void guardarExcepcion(Long id,Long excepcionId,ExcepcionForm f) {
         acceso.modificar(id);var p=psicologos.bloquearPorId(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         validarHoras(f.getHoraInicio(),f.getHoraFin());
@@ -77,12 +77,12 @@ public class DisponibilidadService {
         e.setPsicologo(p);e.setFecha(f.getFecha());e.setHoraInicio(f.getHoraInicio());e.setHoraFin(f.getHoraFin());e.setTipo(f.getTipo());e.setMotivo(f.getMotivo());excepciones.saveAndFlush(e);
     }
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public void eliminarHorario(Long id,Long horarioId) {
         acceso.modificar(id);psicologos.bloquearPorId(id);horarios.delete(horarioPropio(id,horarioId));horarios.flush();
     }
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public void eliminarExcepcion(Long id,Long excepcionId) {
         acceso.modificar(id);psicologos.bloquearPorId(id);excepciones.delete(excepcionPropia(id,excepcionId));excepciones.flush();
     }
