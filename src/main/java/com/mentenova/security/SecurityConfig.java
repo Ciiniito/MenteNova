@@ -41,7 +41,8 @@ public class SecurityConfig {
                                 CsrfFilter.DEFAULT_CSRF_MATCHER,
                                 new OrRequestMatcher(
                                         new AntPathRequestMatcher("/psicologos/**"),
-                                        new AntPathRequestMatcher("/especialidades/**")
+                                        new AntPathRequestMatcher("/especialidades/**"),
+                                        new AntPathRequestMatcher("/citas/**")
                                 )
                         )
                 ))
@@ -51,6 +52,7 @@ public class SecurityConfig {
                         .hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA")
                         .requestMatchers("/mis-citas", "/mis-citas/**").hasRole("PACIENTE")
                         .requestMatchers("/agenda", "/agenda/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA", "PSICOLOGO")
+                        .requestMatchers("/citas", "/citas/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA")
                         .requestMatchers("/reportes/ingresos", "/reportes/ingresos/**", "/api/reportes/ingresos", "/api/reportes/ingresos/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/reportes", "/reportes/**", "/api/reportes", "/api/reportes/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA")
                         .requestMatchers("/mi-disponibilidad", "/psicologos/*/disponibilidad", "/psicologos/*/disponibilidad/**", "/api/disponibilidad", "/api/disponibilidad/**").hasAnyRole("ADMINISTRADOR", "RECEPCIONISTA")

@@ -7,6 +7,7 @@ param(
     [string]$ClaveApp = 'mentenova_app',
     [string]$ClavePostgres,
     [string]$CarpetaCambios,
+    [string]$CarpetaDemo,
     [switch]$SinDatosDemo,
     [switch]$Recrear,
     [switch]$Confirmar
@@ -79,6 +80,48 @@ function Get-ValorApp([string]$Sql) {
     @(Invoke-App @('-At', '-c', $Sql)) | Select-Object -First 1
 }
 
+function Get-Checksum([string]$Ruta) {
+    $texto = [System.IO.File]::ReadAllText($Ruta).Replace("`r`n", "`n")
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($texto))
+        return -join ($bytes | ForEach-Object { $_.ToString('x2') })
+    }
+    finally {
+        $sha.Dispose()
+    }
+}
+
+function Invoke-ScriptsPendientes([string]$Carpeta, [string]$Prefijo) {
+    $archivos = @()
+    if (Test-Path $Carpeta) {
+        $archivos = @(Get-ChildItem $Carpeta -Filter '*.sql' -File | Sort-Object Name)
+    }
+    $aplicados = 0
+    foreach ($archivo in $archivos) {
+        if ($archivo.Name -notmatch '^[A-Za-z0-9_.-]+$') {
+            throw "Nombre de script no valido: $($archivo.Name) (usa letras, numeros, guion y guion bajo)."
+        }
+        if ((Get-Content $archivo.FullName -Raw) -match '(?im)^\s*(BEGIN|COMMIT|ROLLBACK)\s*;') {
+            throw "$($archivo.Name) contiene BEGIN/COMMIT. Quitalos: este script ya ejecuta cada archivo en una transaccion."
+        }
+        $nombre = "$Prefijo/$($archivo.Name)"
+        $checksum = Get-Checksum $archivo.FullName
+        $registrado = Get-ValorApp "SELECT checksum FROM control_cambios WHERE nombre = '$nombre'"
+        if (-not $registrado) {
+            Write-Info "Aplicando $nombre..."
+            Invoke-App @('-1', '-c', 'SET client_min_messages = warning', '-f', $archivo.FullName,
+                '-c', "INSERT INTO control_cambios (nombre, checksum) VALUES ('$nombre', '$checksum')") | Out-Null
+            Write-Ok "$nombre aplicado."
+            $aplicados++
+        }
+        elseif ($registrado -ne $checksum) {
+            Write-Aviso "$nombre se modifico despues de aplicarse; no se vuelve a ejecutar. Para corregir algo, crea un script nuevo."
+        }
+    }
+    return [pscustomobject]@{ Total = $archivos.Count; Aplicados = $aplicados }
+}
+
 try {
     try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }
     $env:PGCLIENTENCODING = 'UTF8'
@@ -89,6 +132,7 @@ try {
     $claveAppSql = $ClaveApp.Replace("'", "''")
 
     if (-not $CarpetaCambios) { $CarpetaCambios = Join-Path $PSScriptRoot 'cambios' }
+    if (-not $CarpetaDemo) { $CarpetaDemo = Join-Path $PSScriptRoot 'demo' }
 
     $script:Psql = Find-Psql
     $archivoEsquema = Join-Path $PSScriptRoot 'mentenova_schema.sql'
@@ -175,48 +219,35 @@ try {
     Invoke-App @('-c', 'SET client_min_messages = warning',
         '-c', 'CREATE TABLE IF NOT EXISTS control_cambios (nombre VARCHAR(200) PRIMARY KEY, checksum VARCHAR(64) NOT NULL, aplicado_por VARCHAR(100) NOT NULL DEFAULT CURRENT_USER, aplicado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)') | Out-Null
 
-    $scripts = @()
-    if (Test-Path $CarpetaCambios) {
-        $scripts = @(Get-ChildItem $CarpetaCambios -Filter '*.sql' -File | Sort-Object Name)
-    }
-    $aplicados = 0
-    foreach ($cambio in $scripts) {
-        if ($cambio.Name -notmatch '^[A-Za-z0-9_.-]+$') {
-            throw "Nombre de script no valido: $($cambio.Name) (usa letras, numeros, guion y guion bajo)."
-        }
-        if ((Get-Content $cambio.FullName -Raw) -match '(?im)^\s*(BEGIN|COMMIT|ROLLBACK)\s*;') {
-            throw "$($cambio.Name) contiene BEGIN/COMMIT. Quitalos: este script ya ejecuta cada cambio en una transaccion."
-        }
-        $checksum = (Get-FileHash $cambio.FullName -Algorithm SHA256).Hash.ToLower()
-        $registrado = Get-ValorApp "SELECT checksum FROM control_cambios WHERE nombre = '$($cambio.Name)'"
-        if (-not $registrado) {
-            Write-Info "Aplicando $($cambio.Name)..."
-            Invoke-App @('-1', '-f', $cambio.FullName,
-                '-c', "INSERT INTO control_cambios (nombre, checksum) VALUES ('$($cambio.Name)', '$checksum')") | Out-Null
-            Write-Ok "$($cambio.Name) aplicado."
-            $aplicados++
-        }
-        elseif ($registrado -ne $checksum) {
-            Write-Aviso "$($cambio.Name) se modifico despues de aplicarse; no se vuelve a ejecutar. Para corregir algo, crea un script nuevo."
-        }
-    }
-    if ($scripts.Count -eq 0) { Write-Ok 'No hay scripts de cambios todavia.' }
-    elseif ($aplicados -eq 0) { Write-Ok "Los $($scripts.Count) scripts de cambios ya estaban aplicados." }
+    $cambios = Invoke-ScriptsPendientes $CarpetaCambios 'cambios'
+    if ($cambios.Total -eq 0) { Write-Ok 'No hay scripts de cambios todavia.' }
+    elseif ($cambios.Aplicados -eq 0) { Write-Ok "Los $($cambios.Total) scripts de cambios ya estaban aplicados." }
 
-    Write-Paso '6/6 Datos de demostracion (reportes_datos_demo.sql)'
+    Write-Paso '6/6 Datos de demostracion (reportes_datos_demo.sql y database\demo)'
     if ($SinDatosDemo) {
         Write-Info 'Omitidos (-SinDatosDemo).'
     }
-    elseif ([int](Get-ValorApp "SELECT count(*) FROM usuario WHERE lower(correo) LIKE '%@demo.mentenova.local'") -gt 0) {
-        Write-Ok 'Ya estaban cargados. Para regenerarlos con fechas actuales usa -Recrear.'
-    }
     else {
-        Invoke-App @('-f', $archivoDemo) | Out-Null
-        Write-Ok 'Usuarios, citas y pagos de demostracion cargados.'
+        if ([int](Get-ValorApp "SELECT count(*) FROM usuario WHERE lower(correo) LIKE '%@demo.mentenova.local'") -gt 0) {
+            Write-Ok 'Datos base ya cargados. Para regenerarlos con fechas actuales usa -Recrear.'
+        }
+        else {
+            Invoke-App @('-f', $archivoDemo) | Out-Null
+            Write-Ok 'Usuarios, citas y pagos de demostracion cargados.'
+        }
+        $demo = Invoke-ScriptsPendientes $CarpetaDemo 'demo'
+        if ($demo.Total -gt 0 -and $demo.Aplicados -eq 0) {
+            Write-Ok "Los $($demo.Total) scripts de datos de prueba ya estaban aplicados."
+        }
     }
 
     Write-Paso 'Resumen'
-    Write-Ok (Get-ValorApp "SELECT (SELECT count(*) FROM usuario) || ' usuarios, ' || (SELECT count(*) FROM cita) || ' citas, ' || (SELECT count(*) FROM pago) || ' pagos, ' || (SELECT count(*) FROM control_cambios) || ' cambios aplicados'")
+    Write-Ok (Get-ValorApp "SELECT (SELECT count(*) FROM usuario) || ' usuarios, ' || (SELECT count(*) FROM paciente) || ' pacientes, ' || (SELECT count(*) FROM cita) || ' citas, ' || (SELECT count(*) FROM pago) || ' pagos, ' || (SELECT count(*) FROM control_cambios) || ' scripts registrados'")
+    Write-Ok (Get-ValorApp "SELECT (SELECT count(*) FROM psicologo) || ' psicologos, ' || (SELECT count(*) FROM especialidad) || ' especialidades, ' || (SELECT count(*) FROM disponibilidad) || ' franjas de disponibilidad, ' || (SELECT count(*) FROM excepcion_disponibilidad) || ' excepciones'")
+    if ([int](Get-ValorApp 'SELECT count(*) FROM usuario') -eq 0) {
+        Write-Aviso 'La base no tiene usuarios. Para crear el administrador inicial ejecuta:'
+        Write-Aviso "  psql -h $Servidor -p $Puerto -U $UsuarioApp -d $BaseDatos -f src\main\resources\data.sql"
+    }
     Write-Host ''
     Write-Host 'Listo. Inicia la aplicacion y entra a http://localhost:8080/mentenova/login' -ForegroundColor Green
     if (-not $SinDatosDemo) {

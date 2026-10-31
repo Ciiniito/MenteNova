@@ -155,7 +155,8 @@ public class ReporteRepository {
                 .addValue("ahora", ahora)
                 .addValue("limite", limite);
         StringBuilder sql = new StringBuilder(SELECT_CITA)
-                .append("WHERE (c.fecha > :hoy OR (c.fecha = :hoy AND c.hora_fin > :ahora))");
+                .append("WHERE (c.fecha > :hoy OR (c.fecha = :hoy AND c.hora_fin > :ahora))")
+                .append(" AND ec.codigo IN ('PENDIENTE', 'CONFIRMADA')");
         if (idPsicologo != null) {
             sql.append(" AND c.id_psicologo = :idPsicologo");
             params.addValue("idPsicologo", idPsicologo);

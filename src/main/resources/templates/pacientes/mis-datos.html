@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Mis datos')}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('mis-datos')}"></aside>
+
+    <main class="mn-main">
+        <header th:replace="~{fragments/panel :: topbar('Mis datos', 'Consulta tus datos y tus citas en MenteNova.')}"></header>
+
+        <div th:if="${exito}" class="alert alert-success d-flex align-items-center gap-2" role="status">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            <span th:text="${exito}">Tus datos se actualizaron.</span>
+        </div>
+
+        <section th:if="${ficha == null}" class="mn-card mn-empty">
+            <i class="bi bi-person-vcard" aria-hidden="true"></i>
+            Tu cuenta aún no está vinculada a una ficha de paciente.
+            Comunícate con recepción para completar tu registro.
+        </section>
+
+        <div th:if="${ficha != null}" class="row g-4" th:with="f=${ficha}">
+            <div class="col-lg-5">
+                <section class="mn-card mn-contenedor mb-4">
+                    <div class="mn-ficha-cabecera">
+                        <span class="mn-avatar mn-avatar--grande" th:text="${f.iniciales}">MG</span>
+                        <div class="mn-ficha-datos">
+                            <h2 class="mn-ficha-nombre" th:text="${f.nombreCompleto}">María González Pérez</h2>
+                            <p class="mn-ficha-meta">
+                                <span th:if="${f.edad != null}" th:text="${f.edad + ' años'}">29 años</span>
+                                <span th:if="${f.documento != null}" th:text="${f.documento}">DNI 70000001</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mn-card__body">
+                        <dl class="mn-datos">
+                            <dt>Nacimiento</dt>
+                            <dd th:text="${f.fechaNacimiento != null} ? ${#temporals.format(f.fechaNacimiento, 'dd/MM/yyyy')} : 'No registrado'">
+                                14/03/1997
+                            </dd>
+                            <dt>Cuenta</dt>
+                            <dd th:text="${f.correoCuenta}">paciente@demo.mentenova.local</dd>
+                        </dl>
+                        <p class="mn-nota mt-3 mb-0">
+                            Para corregir tu nombre, documento o fecha de nacimiento, comunícate con recepción.
+                        </p>
+                    </div>
+                </section>
+
+                <form th:action="@{/mis-datos}" method="post" th:object="${contacto}" class="mn-card" novalidate>
+                    <div class="mn-card__header">
+                        <h2 class="mn-card__title">Datos de contacto</h2>
+                    </div>
+                    <div class="mn-card__body">
+                        <div class="mb-3">
+                            <label for="telefono" class="form-label">Teléfono <span class="text-danger" aria-hidden="true">*</span></label>
+                            <input type="tel" class="form-control" th:field="*{telefono}" th:errorclass="is-invalid"
+                                   maxlength="20" required autocomplete="tel"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}">Error</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="correo" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" th:field="*{correo}" th:errorclass="is-invalid"
+                                   maxlength="254" autocomplete="email"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}">Error</div>
+                        </div>
+                        <div>
+                            <label for="direccion" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" th:field="*{direccion}" th:errorclass="is-invalid"
+                                   maxlength="250" autocomplete="street-address"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}">Error</div>
+                        </div>
+                    </div>
+                    <div class="mn-card__footer text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2" aria-hidden="true"></i> Guardar cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-lg-7">
+                <section class="mn-kpis mb-4" aria-label="Resumen de mis citas">
+                    <div class="mn-card mn-kpi">
+                        <div class="mn-kpi__icon mn-tone--primary"><i class="bi bi-calendar2-week" aria-hidden="true"></i></div>
+                        <div>
+                            <div class="mn-kpi__label">Citas registradas</div>
+                            <div class="mn-kpi__value" th:text="${f.citasRegistradas}">0</div>
+                        </div>
+                    </div>
+                    <div class="mn-card mn-kpi">
+                        <div class="mn-kpi__icon mn-tone--PENDIENTE"><i class="bi bi-clock" aria-hidden="true"></i></div>
+                        <div>
+                            <div class="mn-kpi__label">Próxima cita</div>
+                            <th:block th:replace="~{pacientes/fragmentos :: proxima-cita(${f.proximaCita})}"></th:block>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mn-card">
+                    <div class="mn-card__header">
+                        <h2 class="mn-card__title">Mis citas</h2>
+                    </div>
+                    <div th:if="${#lists.isEmpty(f.historial)}" class="mn-empty">
+                        <i class="bi bi-calendar-x" aria-hidden="true"></i>
+                        Aún no tienes citas registradas.
+                    </div>
+                    <div class="table-responsive" th:unless="${#lists.isEmpty(f.historial)}">
+                        <table class="table mn-table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Hora</th>
+                                <th scope="col">Psicólogo</th>
+                                <th scope="col">Modalidad</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Pago</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="c : ${f.historial}">
+                                <td class="text-nowrap" th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}">05/10/2026</td>
+                                <td class="text-nowrap"
+                                    th:text="|${#temporals.format(c.horaInicio, 'HH:mm')} - ${#temporals.format(c.horaFin, 'HH:mm')}|">09:00 - 10:00</td>
+                                <td th:text="${c.psicologo}">Laura Méndez</td>
+                                <td><span th:replace="~{fragments/panel :: modalidad(${c.modalidad})}"></span></td>
+                                <td><span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}" th:text="${c.estadoNombre}">Atendida</span></td>
+                                <td><th:block th:replace="~{pacientes/fragmentos :: pago(${c.estadoPago})}"></th:block></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mn-card__footer">
+                        Para reprogramar o cancelar una cita, comunícate con recepción.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body>
+</html>

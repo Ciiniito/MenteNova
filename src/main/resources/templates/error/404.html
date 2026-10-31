@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('No encontrado')}"></head>
+<body class="mn-panel">
+<main class="mn-error-page">
+    <div class="mn-card mn-error-card">
+        <div class="mn-kpi__icon mn-tone--PENDIENTE"><i class="bi bi-search" aria-hidden="true"></i></div>
+        <h1 class="h4 fw-bold">No encontramos lo que buscas</h1>
+        <p class="text-secondary">
+            El registro solicitado no existe o fue retirado.
+        </p>
+        <a th:href="@{/inicio}" class="btn btn-primary mt-2"><i class="bi bi-house-door" aria-hidden="true"></i> <span>Volver al inicio</span></a>
+    </div>
+</main>
+</body>
+</html>

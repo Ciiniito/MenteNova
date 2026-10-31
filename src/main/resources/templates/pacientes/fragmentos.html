@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<body>
+
+<th:block th:fragment="pago(estado)" th:switch="${estado}">
+    <span th:case="'PAGADO'" class="mn-estado mn-tone--PAGADO">Pagado</span>
+    <span th:case="'PENDIENTE'" class="mn-estado mn-tone--PENDIENTE">Pago pendiente</span>
+    <span th:case="'ANULADO'" class="mn-estado mn-tone--ANULADO">Pago anulado</span>
+    <span th:case="*" class="mn-estado mn-tone--neutral">Sin pago</span>
+</th:block>
+
+<th:block th:fragment="proxima-cita(cita)">
+    <th:block th:if="${cita != null}">
+        <div class="mn-mini-valor" th:text="${#temporals.format(cita.fecha, 'dd/MM/yyyy')}">15/05/2026</div>
+        <div class="mn-mini-detalle"
+             th:text="|${#temporals.format(cita.horaInicio, 'HH:mm')} - ${#temporals.format(cita.horaFin, 'HH:mm')} · ${cita.modalidad == 'VIRTUAL' ? 'Virtual' : 'Presencial'}|">
+            09:00 - 10:00 · Presencial
+        </div>
+    </th:block>
+    <div class="mn-mini-valor mn-mini-valor--vacio" th:if="${cita == null}">Sin citas programadas</div>
+</th:block>
+
+</body>
+</html>

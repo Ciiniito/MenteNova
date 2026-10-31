@@ -68,7 +68,7 @@ public class DashboardService {
                 hoy,
                 reporteRepository.resumirPorEstado(new FiltroReporte(hoy, hoy, idPsicologo)),
                 reporteRepository.listarProximasCitas(hoy, ahora, idPsicologo, null, LIMITE_PROXIMAS_CITAS),
-                construirCalendario(mes != null ? mes : mesActual, hoy, idPsicologo),
+                construirCalendario(mes != null && FiltroReporte.admite(mes) ? mes : mesActual, hoy, idPsicologo),
                 periodo.getDesde(),
                 periodo.getHasta(),
                 reporteRepository.resumirPorEstado(periodo));

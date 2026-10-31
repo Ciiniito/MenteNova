@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Ficha del paciente')}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('pacientes')}"></aside>
+
+    <main class="mn-main" th:with="p=${paciente}, gestiona=${usuarioSesion.puedeGestionarPacientes()}">
+        <a th:href="@{/pacientes}" class="mn-link d-inline-flex align-items-center gap-1 mb-2">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i> Volver a pacientes
+        </a>
+        <header th:replace="~{fragments/panel :: topbar(${paciente.nombreCompleto}, 'Ficha administrativa del paciente')}"></header>
+
+        <div th:if="${exito}" class="alert alert-success d-flex align-items-center gap-2" role="status">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            <span th:text="${exito}">Datos actualizados.</span>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <section class="mn-card mn-contenedor mb-3">
+                    <div class="mn-ficha-cabecera">
+                        <span class="mn-avatar mn-avatar--grande" th:text="${p.iniciales}">MG</span>
+                        <div class="mn-ficha-datos">
+                            <h2 class="mn-ficha-nombre" th:text="${p.nombreCompleto}">María González Pérez</h2>
+                            <p class="mn-ficha-meta">
+                                <span class="mn-estado" th:classappend="${p.activo} ? 'mn-tone--CONFIRMADA' : 'mn-tone--ANULADO'"
+                                      th:text="${p.activo} ? 'Activo' : 'Inactivo'">Activo</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mn-card__body">
+                        <dl class="mn-datos">
+                            <th:block th:if="${gestiona}">
+                                <dt>Documento</dt>
+                                <dd th:text="${p.documento ?: 'Sin documento'}">DNI 45872536</dd>
+                                <dt>Nacimiento</dt>
+                                <dd th:text="${p.fechaNacimiento != null} ? |${#temporals.format(p.fechaNacimiento, 'dd/MM/yyyy')} (${p.edad} años)| : 'No registrado'">
+                                    14/03/1997 (29 años)
+                                </dd>
+                            </th:block>
+                            <th:block th:unless="${gestiona}">
+                                <dt>Edad</dt>
+                                <dd th:text="${p.edad != null} ? |${p.edad} años| : 'No registrada'">29 años</dd>
+                            </th:block>
+                            <dt>Teléfono</dt>
+                            <dd th:text="${p.telefono}">+51 987 654 321</dd>
+                            <dt>Correo</dt>
+                            <dd th:text="${p.correo ?: 'No registrado'}">maria@correo.com</dd>
+                            <th:block th:if="${gestiona}">
+                                <dt>Dirección</dt>
+                                <dd th:text="${p.direccion ?: 'No registrada'}">Av. Arequipa 1234</dd>
+                                <dt>Cuenta de acceso</dt>
+                                <dd th:text="${p.correoCuenta ?: 'Sin cuenta vinculada'}">paciente@demo.mentenova.local</dd>
+                                <dt>Registrado</dt>
+                                <dd th:text="${p.fechaRegistro != null} ? ${#temporals.format(p.fechaRegistro, 'dd/MM/yyyy HH:mm')} : 'Sin fecha'">
+                                    29/10/2026 23:00
+                                </dd>
+                            </th:block>
+                        </dl>
+                    </div>
+                    <div class="mn-card__footer d-flex flex-wrap gap-2" th:if="${gestiona}">
+                        <a th:href="@{/pacientes/{id}/editar(id=${p.id})}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-pencil" aria-hidden="true"></i> Editar datos
+                        </a>
+                        <form th:action="@{/pacientes/{id}/estado(id=${p.id})}" method="post">
+                            <input type="hidden" name="activo" th:value="${!p.activo}"/>
+                            <button type="submit" class="btn btn-sm"
+                                    th:classappend="${p.activo} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                    onclick="return confirm('¿Confirmas el cambio de estado del paciente?');">
+                                <i class="bi" th:classappend="${p.activo} ? 'bi-person-dash' : 'bi-person-check'" aria-hidden="true"></i>
+                                <span th:text="${p.activo} ? 'Desactivar' : 'Activar'">Desactivar</span>
+                            </button>
+                        </form>
+                    </div>
+                </section>
+                <p class="mn-nota">
+                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                    Solo datos administrativos; no se registra información clínica (RN07).
+                </p>
+            </div>
+
+            <div class="col-lg-8">
+                <section class="mn-kpis mb-4" aria-label="Resumen de citas">
+                    <div class="mn-card mn-kpi">
+                        <div class="mn-kpi__icon mn-tone--primary"><i class="bi bi-calendar2-week" aria-hidden="true"></i></div>
+                        <div>
+                            <div class="mn-kpi__label" th:text="${gestiona} ? 'Citas registradas' : 'Citas contigo'">Citas registradas</div>
+                            <div class="mn-kpi__value" th:text="${p.citasRegistradas}">0</div>
+                        </div>
+                    </div>
+                    <div class="mn-card mn-kpi">
+                        <div class="mn-kpi__icon mn-tone--PENDIENTE"><i class="bi bi-clock" aria-hidden="true"></i></div>
+                        <div>
+                            <div class="mn-kpi__label">Próxima cita</div>
+                            <th:block th:replace="~{pacientes/fragmentos :: proxima-cita(${p.proximaCita})}"></th:block>
+                        </div>
+                    </div>
+                    <div class="mn-card mn-kpi">
+                        <div class="mn-kpi__icon mn-tone--ATENDIDA"><i class="bi bi-person-badge" aria-hidden="true"></i></div>
+                        <div>
+                            <div class="mn-kpi__label">Psicólogo asignado</div>
+                            <div class="mn-mini-valor" th:text="${p.psicologoAsignado ?: 'Sin asignar'}">Laura Méndez</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mn-card mb-4">
+                    <div class="mn-card__header">
+                        <div>
+                            <h2 class="mn-card__title">Historial de citas</h2>
+                            <p class="mn-card__subtitle" th:text="${gestiona} ? 'Todas las citas del paciente' : 'Solo las citas contigo'">
+                                Todas las citas del paciente
+                            </p>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(p.historial)}" class="mn-empty">
+                        <i class="bi bi-calendar-x" aria-hidden="true"></i>
+                        El paciente aún no tiene citas.
+                    </div>
+                    <div class="table-responsive" th:unless="${#lists.isEmpty(p.historial)}">
+                        <table class="table mn-table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Hora</th>
+                                <th scope="col">Psicólogo</th>
+                                <th scope="col">Modalidad</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" th:if="${p.muestraPagos}">Pago</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="c : ${p.historial}">
+                                <td class="text-nowrap" th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}">05/10/2026</td>
+                                <td class="text-nowrap"
+                                    th:text="|${#temporals.format(c.horaInicio, 'HH:mm')} - ${#temporals.format(c.horaFin, 'HH:mm')}|">09:00 - 10:00</td>
+                                <td th:text="${c.psicologo}">Laura Méndez</td>
+                                <td><span th:replace="~{fragments/panel :: modalidad(${c.modalidad})}"></span></td>
+                                <td><span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}" th:text="${c.estadoNombre}">Atendida</span></td>
+                                <td th:if="${p.muestraPagos}">
+                                    <th:block th:replace="~{pacientes/fragmentos :: pago(${c.estadoPago})}"></th:block>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="mn-card" th:if="${usuarioSesion.esAdministrador()}">
+                    <div class="mn-card__header">
+                        <div>
+                            <h2 class="mn-card__title">Cambios recientes</h2>
+                            <p class="mn-card__subtitle">Auditoría de la ficha (visible solo para el Administrador)</p>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(p.cambios)}" class="mn-empty">
+                        <i class="bi bi-journal-check" aria-hidden="true"></i>
+                        Sin cambios registrados.
+                    </div>
+                    <div class="table-responsive" th:unless="${#lists.isEmpty(p.cambios)}">
+                        <table class="table mn-table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                                <th scope="col">Cambio</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="cambio : ${p.cambios}">
+                                <td class="text-nowrap" th:text="${#temporals.format(cambio.fecha, 'dd/MM/yyyy HH:mm')}">29/10/2026 23:10</td>
+                                <td th:text="${cambio.usuario}">Ana Martínez Soto</td>
+                                <td th:text="${cambio.descripcion}">Teléfono, Correo</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body>
+</html>

@@ -40,6 +40,9 @@ public class Cita {
     @Column(name = "observacion")
     private String observacion;
 
+    @Column(name = "creado_por", nullable = false, updatable = false)
+    private Long creadoPor;
+
     public Cita() {
     }
 
@@ -121,5 +124,13 @@ public class Cita {
 
     public void setObservacion(String observacion) {
         this.observacion = observacion;
+    }
+
+    public Long getCreadoPor() {
+        return creadoPor;
+    }
+
+    public void setCreadoPor(Long creadoPor) {
+        this.creadoPor = creadoPor;
     }
 }

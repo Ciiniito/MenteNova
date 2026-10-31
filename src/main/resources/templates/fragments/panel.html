@@ -57,56 +57,37 @@
             </a>
 
             <th:block th:if="${esPersonal}">
+                <a th:if="${usuarioSesion.puedeGestionarPacientes()}" th:href="@{/citas}" class="mn-nav__link"
+                   th:classappend="${activo == 'citas'} ? 'active'"
+                   th:attr="aria-current=${activo == 'citas' ? 'page' : null}">
+                    <i class="bi bi-calendar-plus" aria-hidden="true"></i><span>Gestión de citas</span>
+                </a>
+                <a th:href="@{/agenda}" class="mn-nav__link" th:classappend="${activo == 'agenda'} ? 'active'"><i class="bi bi-calendar3" aria-hidden="true"></i><span>Agenda</span></a>
+                <th:block th:if="${usuarioSesion.rol != 'PSICOLOGO'}">
+                    <a th:href="@{/pacientes}" class="mn-nav__link"
+                       th:classappend="${activo == 'pacientes'} ? 'active'">
+                        <i class="bi bi-people" aria-hidden="true"></i><span>Pacientes</span>
+                    </a>
+                    <a th:href="@{/psicologos}" class="mn-nav__link"
+                       th:classappend="${activo == 'psicologos'} ? 'active'">
+                        <i class="bi bi-person-badge" aria-hidden="true"></i><span>Psicólogos</span>
+                    </a>
+                    <a th:if="${usuarioSesion.esAdministrador()}" th:href="@{/especialidades}" class="mn-nav__link" th:classappend="${activo == 'especialidades'} ? 'active'"><i class="bi bi-tags" aria-hidden="true"></i><span>Especialidades</span></a>
+                    <span class="mn-nav__link disabled" aria-disabled="true">
+                        <i class="bi bi-credit-card" aria-hidden="true"></i><span>Pagos</span>
+                        <small class="mn-nav__pronto">Pronto</small>
+                    </span>
+                </th:block>
+                <a th:if="${usuarioSesion.rol == 'PSICOLOGO'}" th:href="@{/pacientes}" class="mn-nav__link"
+                   th:classappend="${activo == 'pacientes'} ? 'active'">
+                    <i class="bi bi-people" aria-hidden="true"></i><span>Mis pacientes</span>
+                </a>
+            </th:block>
 
-    <a th:href="@{/citas}" class="mn-nav__link"
-       th:classappend="${activo == 'citas'} ? 'active'"
-       th:attr="aria-current=${activo == 'citas' ? 'page' : null}">
-        <i class="bi bi-calendar3" aria-hidden="true"></i>
-        <span>Gestión de Citas</span>
-    </a>
-
-    <a th:href="@{/agenda}" class="mn-nav__link"
-       th:classappend="${activo == 'agenda'} ? 'active'"
-       th:attr="aria-current=${activo == 'agenda' ? 'page' : null}">
-        <i class="bi bi-calendar3" aria-hidden="true"></i>
-        <span>Agenda</span>
-    </a>
-
-    <th:block th:if="${usuarioSesion.rol != 'PSICOLOGO'}">
-
-        <span class="mn-nav__link disabled" aria-disabled="true">
-            <i class="bi bi-people" aria-hidden="true"></i>
-            <span>Pacientes</span>
-            <small class="mn-nav__pronto">Pronto</small>
-        </span>
-
-        <a th:href="@{/psicologos}" class="mn-nav__link"
-           th:classappend="${activo == 'psicologos'} ? 'active'">
-
-            <i class="bi bi-person-badge" aria-hidden="true"></i>
-            <span>Psicólogos</span>
-
-        </a>
-
-        <a th:if="${usuarioSesion.esAdministrador()}"
-           th:href="@{/especialidades}"
-           class="mn-nav__link"
-           th:classappend="${activo == 'especialidades'} ? 'active'">
-
-            <i class="bi bi-tags" aria-hidden="true"></i>
-            <span>Especialidades</span>
-
-        </a>
-
-        <span class="mn-nav__link disabled" aria-disabled="true">
-            <i class="bi bi-credit-card" aria-hidden="true"></i>
-            <span>Pagos</span>
-            <small class="mn-nav__pronto">Pronto</small>
-        </span>
-
-    </th:block>
-
-</th:block>
+            <a th:if="${usuarioSesion != null and usuarioSesion.rol == 'PACIENTE'}" th:href="@{/mis-datos}"
+               class="mn-nav__link" th:classappend="${activo == 'mis-datos'} ? 'active'">
+                <i class="bi bi-person-vcard" aria-hidden="true"></i><span>Mis datos</span>
+            </a>
 
             <th:block th:if="${usuarioSesion != null and usuarioSesion.puedeVerReportes()}">
                 <a th:href="@{/reportes}" class="mn-nav__link"

@@ -1,136 +1,121 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Nueva cita')}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('citas')}"></aside>
 
-<head th:replace="~{fragments/panel :: head('Registrar Cita')}"></head>
+    <main class="mn-main">
+        <a th:href="@{/citas}" class="mn-link d-inline-flex align-items-center gap-1 mb-2">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i> Volver
+        </a>
+        <header th:replace="~{fragments/panel :: topbar('Nueva cita', 'Agenda una cita dentro de la disponibilidad del psicólogo.')}"></header>
 
-<body>
-
-<aside th:replace="~{fragments/panel :: sidebar('citas')}"></aside>
-
-<main class="ms-lg-5 p-4">
-
-    <header th:replace="~{fragments/panel :: topbar(
-            'Registrar Cita',
-            'Nueva cita psicológica')}">
-    </header>
-
-    <div class="container-fluid">
-
-        <div class="card border-0 shadow-sm">
-
-            <div class="card-body">
-
-                <form>
-
-                    <div class="row">
-
-                        <div class="col-md-6 mb-3">
-
-                            <label class="form-label">
-                                Paciente
-                            </label>
-
-                            <input type="text"
-                                   class="form-control">
-
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-
-                            <label class="form-label">
-                                Psicólogo
-                            </label>
-
-                            <input type="text"
-                                   class="form-control">
-
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-
-                            <label class="form-label">
-                                Fecha
-                            </label>
-
-                            <input type="date"
-                                   class="form-control">
-
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-
-                            <label class="form-label">
-                                Hora Inicio
-                            </label>
-
-                            <input type="time"
-                                   class="form-control">
-
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-
-                            <label class="form-label">
-                                Hora Fin
-                            </label>
-
-                            <input type="time"
-                                   class="form-control">
-
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-
-                            <label class="form-label">
-                                Modalidad
-                            </label>
-
-                            <select class="form-select">
-
-                                <option>PRESENCIAL</option>
-                                <option>VIRTUAL</option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-
-                            <label class="form-label">
-                                Observación
-                            </label>
-
-                            <textarea rows="4"
-                                      class="form-control"></textarea>
-
-                        </div>
-
+        <form id="formCita" th:action="@{/citas}" method="post" th:object="${cita}"
+              th:attr="data-disponibilidad=@{/api/disponibilidad}"
+              class="mn-card mn-formulario" novalidate>
+            <div class="mn-card__body">
+                <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger d-flex gap-2" role="alert">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    <div>
+                        <span>Revisa los campos marcados.</span>
+                        <span class="d-block" th:each="error : ${#fields.globalErrors()}" th:text="${error}">Error general</span>
                     </div>
+                </div>
 
-                    <button class="btn btn-primary">
+                <h2 class="mn-form-seccion">Participantes</h2>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="idPaciente" class="form-label">Paciente <span class="text-danger" aria-hidden="true">*</span></label>
+                        <select class="form-select" th:field="*{idPaciente}" th:errorclass="is-invalid" required>
+                            <option value="">Selecciona un paciente</option>
+                            <option th:each="p : ${pacientes}" th:value="${p.valor}" th:text="${p.etiqueta}">María González Pérez · DNI 70000001</option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('idPaciente')}" th:errors="*{idPaciente}">Error</div>
+                        <div class="form-text">
+                            ¿No aparece? <a th:href="@{/pacientes/nuevo}" class="mn-link">Registra al paciente</a> primero.
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="idPsicologo" class="form-label">Psicólogo <span class="text-danger" aria-hidden="true">*</span></label>
+                        <select class="form-select" th:field="*{idPsicologo}" th:errorclass="is-invalid" required>
+                            <option value="">Selecciona un psicólogo</option>
+                            <option th:each="p : ${psicologos}" th:value="${p.valor}" th:text="${p.etiqueta}">Diego Ramos Chávez</option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('idPsicologo')}" th:errors="*{idPsicologo}">Error</div>
+                    </div>
+                </div>
 
-                        Guardar Cita
+                <h2 class="mn-form-seccion">Fecha y horario</h2>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="fecha" class="form-label">Fecha <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="date" class="form-control" th:field="*{fecha}" th:errorclass="is-invalid"
+                               th:min="${hoy}" required/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}">Error</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="modalidad" class="form-label">Modalidad <span class="text-danger" aria-hidden="true">*</span></label>
+                        <select class="form-select" th:field="*{modalidad}" th:errorclass="is-invalid" required>
+                            <option value="PRESENCIAL">Presencial</option>
+                            <option value="VIRTUAL">Virtual</option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('modalidad')}" th:errors="*{modalidad}">Error</div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label for="horaInicio" class="form-label">Inicio <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="time" class="form-control" th:field="*{horaInicio}" th:errorclass="is-invalid"
+                               step="60" required/>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label for="horaFin" class="form-label">Fin <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="time" class="form-control" th:field="*{horaFin}" th:errorclass="is-invalid"
+                               step="60" required/>
+                    </div>
+                    <div class="col-12" th:if="${#fields.hasErrors('horaInicio') or #fields.hasErrors('horaFin')}">
+                        <div class="text-danger small" th:each="error : ${#fields.errors('horaInicio')}" th:text="${error}">Error</div>
+                        <div class="text-danger small" th:each="error : ${#fields.errors('horaFin')}" th:text="${error}">Error</div>
+                    </div>
+                </div>
+                <div class="mb-4" aria-live="polite">
+                    <span class="form-label d-block">Horarios libres del psicólogo</span>
+                    <div id="disponibilidad" class="d-flex flex-wrap gap-2 align-items-center">
+                        <span class="form-text m-0">Selecciona psicólogo, fecha y modalidad para ver sus horarios libres.</span>
+                    </div>
+                    <div class="form-text">Al elegir un horario se propone una sesión de 60 minutos; puedes ajustar las horas.</div>
+                </div>
 
-                    </button>
-
-                    <a th:href="@{/citas}"
-                       class="btn btn-secondary">
-
-                        Volver
-
-                    </a>
-
-                </form>
-
+                <h2 class="mn-form-seccion">Detalle administrativo <span class="mn-form-opcional">(opcional)</span></h2>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="motivoAdministrativo" class="form-label">Motivo administrativo</label>
+                        <input type="text" class="form-control" th:field="*{motivoAdministrativo}" th:errorclass="is-invalid"
+                               maxlength="250" placeholder="Ej. Primera consulta, seguimiento" autocomplete="off"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('motivoAdministrativo')}" th:errors="*{motivoAdministrativo}">Error</div>
+                    </div>
+                    <div class="col-12">
+                        <label for="observacion" class="form-label">Observación</label>
+                        <textarea class="form-control" th:field="*{observacion}" th:errorclass="is-invalid"
+                                  rows="3" maxlength="500"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('observacion')}" th:errors="*{observacion}">Error</div>
+                    </div>
+                </div>
             </div>
-
-        </div>
-
-    </div>
-
-</main>
+            <div class="mn-card__footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span><i class="bi bi-shield-check" aria-hidden="true"></i> No registres diagnósticos ni notas clínicas (RN07).</span>
+                <div class="d-flex gap-2">
+                    <a th:href="@{/citas}" class="btn btn-light border">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2" aria-hidden="true"></i> Guardar cita
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+</div>
 
 <th:block th:replace="~{fragments/panel :: scripts}"></th:block>
-
+<script th:src="@{/js/citas.js}"></script>
 </body>
 </html>

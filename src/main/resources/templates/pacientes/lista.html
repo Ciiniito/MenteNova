@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Pacientes')}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('pacientes')}"></aside>
+
+    <main class="mn-main"
+          th:with="gestiona=${usuarioSesion.puedeGestionarPacientes()},
+                   subtitulo=${usuarioSesion.puedeGestionarPacientes() ? 'Gestiona la información de tus pacientes.' : 'Pacientes que tienen citas contigo.'}">
+        <header th:replace="~{fragments/panel :: topbar('Pacientes', ${subtitulo})}"></header>
+
+        <div th:if="${exito}" class="alert alert-success d-flex align-items-center gap-2" role="status">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            <span th:text="${exito}">Paciente registrado correctamente.</span>
+        </div>
+
+        <form th:action="@{/pacientes}" method="get" class="mn-card mn-filtros mb-4" role="search">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-lg">
+                    <label for="q" class="form-label">Buscar paciente</label>
+                    <div class="mn-buscador">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                        <input type="search" id="q" name="q" class="form-control" th:value="${q}"
+                               placeholder="Buscar por DNI o nombre..." autocomplete="off"/>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-auto">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="ACTIVOS" th:selected="${estado == 'ACTIVOS'}">Activos</option>
+                        <option value="INACTIVOS" th:selected="${estado == 'INACTIVOS'}">Inactivos</option>
+                        <option value="TODOS" th:selected="${estado == 'TODOS'}">Todos</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="bi bi-search" aria-hidden="true"></i> Buscar
+                    </button>
+                    <a th:href="@{/pacientes}" class="btn btn-light border flex-fill">Limpiar</a>
+                </div>
+                <div class="col-12 col-lg-auto" th:if="${gestiona}">
+                    <a th:href="@{/pacientes/nuevo(q=${q})}" class="btn btn-primary w-100">
+                        <i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo paciente
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <div class="row g-4">
+            <div th:class="${seleccion != null} ? 'col-xl-7' : 'col-12'">
+                <section class="mn-card">
+                    <div class="mn-card__header">
+                        <div>
+                            <h2 class="mn-card__title">Bandeja de pacientes</h2>
+                            <p class="mn-card__subtitle"
+                               th:text="${resultado.totalElementos == 1 ? '1 paciente' : resultado.totalElementos + ' pacientes'}">0 pacientes</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(resultado.contenido)}" class="mn-empty">
+                        <i class="bi bi-people" aria-hidden="true"></i>
+                        <span th:text="${q != null} ? 'No se encontraron pacientes para la búsqueda.' : 'No hay pacientes en este estado.'">
+                            No hay pacientes.
+                        </span>
+                        <div class="mt-3" th:if="${gestiona}">
+                            <a th:href="@{/pacientes/nuevo(q=${q})}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-person-plus" aria-hidden="true"></i> Registrar nuevo paciente
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive" th:unless="${#lists.isEmpty(resultado.contenido)}">
+                        <table class="table mn-table mn-table--interactiva">
+                            <thead>
+                            <tr>
+                                <th scope="col">Paciente</th>
+                                <th scope="col" th:if="${gestiona}">Documento</th>
+                                <th scope="col">Teléfono</th>
+                                <th scope="col" class="text-center mn-th-flexible" th:text="${gestiona} ? 'Citas registradas' : 'Citas contigo'">
+                                    Citas registradas
+                                </th>
+                                <th scope="col" class="text-end" th:if="${seleccion == null}">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="p : ${resultado.contenido}"
+                                th:classappend="${seleccion != null and seleccion.id == p.id} ? 'mn-fila-activa'">
+                                <td>
+                                    <a class="mn-persona mn-persona--enlace"
+                                       th:href="@{/pacientes(q=${q}, estado=${estado}, pagina=${resultado.pagina}, seleccionado=${p.id})}">
+                                        <span class="mn-avatar" th:text="${p.iniciales}">MG</span>
+                                        <span>
+                                            <span class="d-block fw-semibold" th:text="${p.nombreCompleto}">María González Pérez</span>
+                                            <span th:unless="${p.activo}" class="mn-estado mn-tone--ANULADO">Inactivo</span>
+                                        </span>
+                                    </a>
+                                </td>
+                                <td th:if="${gestiona}" class="text-nowrap" th:text="${p.documento ?: 'Sin documento'}">DNI 45872536</td>
+                                <td class="text-nowrap" th:text="${p.telefono}">+51 987 654 321</td>
+                                <td class="text-center"><span class="mn-contador" th:text="${p.citasRegistradas}">12</span></td>
+                                <td class="text-end text-nowrap" th:if="${seleccion == null}">
+                                    <a class="btn btn-sm btn-light border"
+                                       th:href="@{/pacientes(q=${q}, estado=${estado}, pagina=${resultado.pagina}, seleccionado=${p.id}, pestana='historial')}">
+                                        <i class="bi bi-clock-history" aria-hidden="true"></i> Ver historial
+                                    </a>
+                                    <a th:if="${gestiona}" class="btn btn-sm btn-light border" title="Editar datos"
+                                       aria-label="Editar datos" th:href="@{/pacientes/{id}/editar(id=${p.id})}">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mn-card__footer d-flex flex-wrap align-items-center justify-content-between gap-2"
+                         th:if="${resultado.totalElementos > 0}">
+                        <span th:text="|Mostrando ${resultado.desde()} - ${resultado.hasta()} de ${resultado.totalElementos} pacientes|">
+                            Mostrando 1 - 10 de 28 pacientes
+                        </span>
+                        <nav aria-label="Paginación de pacientes" th:if="${resultado.totalPaginas > 1}">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" th:classappend="${resultado.tieneAnterior()} ? '' : 'disabled'">
+                                    <a class="page-link" aria-label="Página anterior"
+                                       th:href="@{/pacientes(q=${q}, estado=${estado}, pagina=${resultado.pagina - 1})}">
+                                        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="n : ${resultado.paginas()}"
+                                    th:classappend="${n == resultado.pagina} ? 'active'">
+                                    <a class="page-link" th:href="@{/pacientes(q=${q}, estado=${estado}, pagina=${n})}"
+                                       th:text="${n}" th:attr="aria-current=${n == resultado.pagina ? 'page' : null}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${resultado.tieneSiguiente()} ? '' : 'disabled'">
+                                    <a class="page-link" aria-label="Página siguiente"
+                                       th:href="@{/pacientes(q=${q}, estado=${estado}, pagina=${resultado.pagina + 1})}">
+                                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-xl-5" th:if="${seleccion != null}" th:with="s=${seleccion}">
+                <aside class="mn-card mn-ficha mn-contenedor" aria-labelledby="ficha-nombre">
+                    <div class="mn-ficha-cabecera">
+                        <span class="mn-avatar mn-avatar--grande" th:text="${s.iniciales}">MG</span>
+                        <div class="mn-ficha-datos">
+                            <h2 id="ficha-nombre" class="mn-ficha-nombre" th:text="${s.nombreCompleto}">María González Pérez</h2>
+                            <p class="mn-ficha-meta">
+                                <span th:if="${s.edad != null}" th:text="${s.edad + ' años'}">28 años</span>
+                                <span th:if="${s.documento != null}" th:text="${s.documento}">DNI 45872536</span>
+                                <span th:unless="${s.activo}" class="mn-estado mn-tone--ANULADO">Inactivo</span>
+                            </p>
+                            <p class="mn-ficha-contacto">
+                                <i class="bi bi-telephone" aria-hidden="true"></i> <span th:text="${s.telefono}">+51 987 654 321</span>
+                            </p>
+                            <p class="mn-ficha-contacto" th:if="${s.correo != null}">
+                                <i class="bi bi-envelope" aria-hidden="true"></i> <span th:text="${s.correo}">maria@correo.com</span>
+                            </p>
+                        </div>
+                        <a class="mn-icon-btn" aria-label="Cerrar ficha"
+                           th:href="@{/pacientes(q=${q}, estado=${estado}, pagina=${resultado.pagina})}">
+                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                    <ul class="nav mn-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link" id="tab-resumen" role="tab"
+                                    data-bs-toggle="tab" data-bs-target="#ficha-resumen" aria-controls="ficha-resumen"
+                                    th:classappend="${pestana == 'resumen'} ? 'active'"
+                                    th:attr="aria-selected=${pestana == 'resumen'}">
+                                <i class="bi bi-grid" aria-hidden="true"></i> Resumen
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link" id="tab-historial" role="tab"
+                                    data-bs-toggle="tab" data-bs-target="#ficha-historial" aria-controls="ficha-historial"
+                                    th:classappend="${pestana == 'historial'} ? 'active'"
+                                    th:attr="aria-selected=${pestana == 'historial'}">
+                                <i class="bi bi-calendar3" aria-hidden="true"></i> Historial de citas
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade mn-ficha-cuerpo" id="ficha-resumen" role="tabpanel" aria-labelledby="tab-resumen"
+                             th:classappend="${pestana == 'resumen'} ? 'show active'">
+                            <div class="mn-mini-grid">
+                                <div class="mn-mini">
+                                    <span class="mn-kpi__icon mn-tone--primary"><i class="bi bi-calendar2-week" aria-hidden="true"></i></span>
+                                    <div>
+                                        <div class="mn-mini-etiqueta" th:text="${gestiona} ? 'Citas registradas' : 'Citas contigo'">Citas registradas</div>
+                                        <div class="mn-mini-valor" th:text="${s.citasRegistradas}">12</div>
+                                    </div>
+                                </div>
+                                <div class="mn-mini">
+                                    <span class="mn-kpi__icon mn-tone--PENDIENTE"><i class="bi bi-clock" aria-hidden="true"></i></span>
+                                    <div>
+                                        <div class="mn-mini-etiqueta">Próxima cita</div>
+                                        <th:block th:replace="~{pacientes/fragmentos :: proxima-cita(${s.proximaCita})}"></th:block>
+                                    </div>
+                                </div>
+                                <div class="mn-mini">
+                                    <span class="mn-kpi__icon mn-tone--ATENDIDA"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
+                                    <div>
+                                        <div class="mn-mini-etiqueta">Psicólogo asignado</div>
+                                        <div class="mn-mini-valor" th:text="${s.psicologoAsignado ?: 'Sin asignar'}">Laura Méndez</div>
+                                    </div>
+                                </div>
+                                <div class="mn-mini">
+                                    <span class="mn-kpi__icon" th:classappend="${s.activo} ? 'mn-tone--CONFIRMADA' : 'mn-tone--ANULADO'">
+                                        <i class="bi" th:classappend="${s.activo} ? 'bi-person-check' : 'bi-person-dash'" aria-hidden="true"></i>
+                                    </span>
+                                    <div>
+                                        <div class="mn-mini-etiqueta">Estado del paciente</div>
+                                        <div class="mn-mini-valor" th:text="${s.activo} ? 'Activo' : 'Inactivo'">Activo</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                <a th:href="@{/pacientes/{id}(id=${s.id})}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-file-earmark-person" aria-hidden="true"></i> Ver ficha completa
+                                </a>
+                                <a th:if="${gestiona}" th:href="@{/pacientes/{id}/editar(id=${s.id})}" class="btn btn-sm btn-light border">
+                                    <i class="bi bi-pencil" aria-hidden="true"></i> Editar datos
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade mn-ficha-cuerpo" id="ficha-historial" role="tabpanel" aria-labelledby="tab-historial"
+                             th:classappend="${pestana == 'historial'} ? 'show active'">
+                            <div th:if="${#lists.isEmpty(s.historial)}" class="mn-empty py-3">
+                                <i class="bi bi-calendar-x" aria-hidden="true"></i>
+                                Sin citas registradas.
+                            </div>
+                            <ul class="mn-historial" th:unless="${#lists.isEmpty(s.historial)}">
+                                <li th:each="c : ${s.historial}">
+                                    <div>
+                                        <div class="mn-historial-fecha" th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}">05/10/2026</div>
+                                        <div class="mn-historial-detalle"
+                                             th:text="|${#temporals.format(c.horaInicio, 'HH:mm')} - ${#temporals.format(c.horaFin, 'HH:mm')}|">09:00 - 10:00</div>
+                                        <div class="mn-historial-detalle" th:text="${c.psicologo}">Laura Méndez</div>
+                                    </div>
+                                    <div class="mn-historial-estados">
+                                        <span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}" th:text="${c.estadoNombre}">Atendida</span>
+                                        <th:block th:if="${s.muestraPagos}">
+                                            <th:block th:replace="~{pacientes/fragmentos :: pago(${c.estadoPago})}"></th:block>
+                                        </th:block>
+                                    </div>
+                                </li>
+                            </ul>
+                            <a th:if="${s.citasRegistradas > #lists.size(s.historial)}"
+                               th:href="@{/pacientes/{id}(id=${s.id})}" class="mn-link d-inline-block mt-2"
+                               th:text="|Ver todas las citas (${s.citasRegistradas})|">Ver todas las citas (12)</a>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body>
+</html>

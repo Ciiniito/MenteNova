@@ -22,12 +22,13 @@ public class UsuarioSesionService {
                 || authentication instanceof AnonymousAuthenticationToken) {
             return Optional.empty();
         }
-        return usuarioRepository.findByCorreo(authentication.getName()).map(UsuarioSesionDTO::de);
+        return usuarioRepository.findByCorreo(authentication.getName())
+                .filter(usuario -> Boolean.TRUE.equals(usuario.getActivo()))
+                .map(UsuarioSesionDTO::de);
     }
 
     public UsuarioSesionDTO requerir(Authentication authentication) {
-        return obtener(authentication)
-                .orElseThrow(() -> new IllegalStateException("No se encontró el usuario autenticado"));
+        return obtener(authentication).orElseThrow(SesionInvalidaException::new);
     }
 
     public static boolean tieneRol(Authentication authentication, String rol) {

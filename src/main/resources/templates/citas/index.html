@@ -1,188 +1,142 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
-
-<head th:replace="~{fragments/panel :: head('Gestión de Citas')}">
-</head>
-
-<body>
-
-<div class="d-flex">
-
-    <!-- Sidebar -->
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head('Gestión de citas')}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
     <aside th:replace="~{fragments/panel :: sidebar('citas')}"></aside>
 
-    <!-- Contenido -->
-    <div class="flex-grow-1">
+    <main class="mn-main">
+        <header th:replace="~{fragments/panel :: topbar('Gestión de citas', 'Registra y consulta las citas del centro.')}"></header>
 
-        <!-- Topbar -->
-        <header th:replace="~{fragments/panel :: topbar(
-                'Gestión de Citas',
-                'Administración de citas psicológicas')}">
-        </header>
-
-        <div class="container-fluid px-4 pb-4">
-
-            <div class="card border-0 shadow-sm">
-
-                <div class="card-body">
-
-                    <!-- Encabezado -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-
-                        <div>
-                            <h2 class="fw-bold mb-1">
-                                Gestión de Citas
-                            </h2>
-
-                            <p class="text-muted mb-0">
-                                Registro, consulta y administración de citas
-                            </p>
-                        </div>
-
-                        <a th:href="@{/citas/nueva}"
-                           class="btn btn-primary">
-
-                            <i class="bi bi-plus-circle me-2"></i>
-                            Nueva Cita
-
-                        </a>
-
-                    </div>
-
-                    <!-- Filtros -->
-                    <div class="row g-3 mb-4">
-
-                        <div class="col-lg-3 col-md-6">
-                            <input type="date"
-                                   class="form-control">
-                        </div>
-
-                        <div class="col-lg-3 col-md-6">
-
-                            <select class="form-select">
-
-                                <option>Todos los estados</option>
-                                <option>PENDIENTE</option>
-                                <option>CONFIRMADA</option>
-                                <option>ATENDIDA</option>
-                                <option>CANCELADA</option>
-                                <option>REPROGRAMADA</option>
-                                <option>NO ASISTIO</option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="col-lg-3 col-md-6">
-                            <input type="text"
-                                   class="form-control"
-                                   placeholder="Buscar paciente">
-                        </div>
-
-                        <div class="col-lg-3 col-md-6">
-
-                            <button class="btn btn-outline-primary w-100">
-                                Buscar
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Tabla -->
-                    <div class="table-responsive">
-
-                        <table class="table table-hover align-middle">
-
-                            <thead class="table-light">
-
-                            <tr>
-                                <th>ID</th>
-                                <th>Fecha</th>
-                                <th>Hora Inicio</th>
-                                <th>Hora Fin</th>
-                                <th>Paciente</th>
-                                <th>Psicólogo</th>
-                                <th>Modalidad</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                            <tr th:each="cita : ${citas}">
-
-                                <td th:text="${cita.id}"></td>
-
-                                <td th:text="${cita.fecha}"></td>
-
-                                <td th:text="${cita.horaInicio}"></td>
-
-                                <td th:text="${cita.horaFin}"></td>
-
-                                <td th:text="${cita.idPaciente}"></td>
-
-                                <td th:text="${cita.idPsicologo}"></td>
-
-                                <td th:text="${cita.modalidad}"></td>
-
-                                <td>
-
-                                    <span class="badge bg-primary"
-                                          th:text="${cita.idEstadoCita}">
-                                    </span>
-
-                                </td>
-
-                                <td>
-
-                                    <button class="btn btn-sm btn-success me-1">
-                                        Confirmar
-                                    </button>
-
-                                    <button class="btn btn-sm btn-warning text-white me-1">
-                                        Reprogramar
-                                    </button>
-
-                                    <button class="btn btn-sm btn-danger">
-                                        Cancelar
-                                    </button>
-
-                                </td>
-
-                            </tr>
-
-                            <tr th:if="${#lists.isEmpty(citas)}">
-
-                                <td colspan="9" class="text-center text-muted py-4">
-
-                                    No existen citas registradas
-
-                                </td>
-
-                            </tr>
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+        <div th:if="${exito}" class="alert alert-success d-flex align-items-center gap-2" role="status">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            <span th:text="${exito}">Cita registrada correctamente.</span>
         </div>
 
-    </div>
+        <form th:action="@{/citas}" method="get" class="mn-card mn-filtros mb-4" role="search">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-sm-6 col-lg-auto">
+                    <label for="fecha" class="form-label">Fecha</label>
+                    <input type="date" id="fecha" name="fecha" class="form-control" th:value="${fecha}"/>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-auto">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="">Todos los estados</option>
+                        <option th:each="e : ${estados}" th:value="${e.valor}" th:text="${e.etiqueta}"
+                                th:selected="${e.valor == estado}">Pendiente</option>
+                    </select>
+                </div>
+                <div class="col-12 col-lg">
+                    <label for="paciente" class="form-label">Paciente</label>
+                    <div class="mn-buscador">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                        <input type="search" id="paciente" name="paciente" class="form-control" th:value="${paciente}"
+                               placeholder="Nombre o documento..." autocomplete="off"/>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="bi bi-search" aria-hidden="true"></i> Buscar
+                    </button>
+                    <a th:href="@{/citas}" class="btn btn-light border flex-fill">Limpiar</a>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-auto">
+                    <a th:href="@{/citas/nueva}" class="btn btn-primary w-100">
+                        <i class="bi bi-calendar-plus" aria-hidden="true"></i> Nueva cita
+                    </a>
+                </div>
+            </div>
+        </form>
 
+        <section class="mn-card">
+            <div class="mn-card__header">
+                <div>
+                    <h2 class="mn-card__title"
+                        th:text="${fecha != null} ? 'Citas del ' + ${#temporals.format(fecha, 'dd/MM/yyyy')} : 'Próximas citas'">
+                        Próximas citas
+                    </h2>
+                    <p class="mn-card__subtitle"
+                       th:text="${resultado.totalElementos == 1 ? '1 cita' : resultado.totalElementos + ' citas'}">0 citas</p>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(resultado.contenido)}" class="mn-empty">
+                <i class="bi bi-calendar-x" aria-hidden="true"></i>
+                <span>No hay citas para los filtros seleccionados.</span>
+                <div class="mt-3">
+                    <a th:href="@{/citas/nueva}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-calendar-plus" aria-hidden="true"></i> Registrar una cita
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive" th:unless="${#lists.isEmpty(resultado.contenido)}">
+                <table class="table mn-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Horario</th>
+                        <th scope="col">Paciente</th>
+                        <th scope="col">Psicólogo</th>
+                        <th scope="col">Modalidad</th>
+                        <th scope="col">Estado</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${resultado.contenido}"
+                        th:classappend="${registrada != null and registrada == c.id} ? 'mn-fila-activa'">
+                        <td class="text-nowrap" th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}">02/11/2026</td>
+                        <td class="text-nowrap"
+                            th:text="${#temporals.format(c.horaInicio, 'HH:mm') + ' – ' + #temporals.format(c.horaFin, 'HH:mm')}">
+                            09:00 – 10:00
+                        </td>
+                        <td>
+                            <a class="mn-link" th:href="@{/pacientes/{id}(id=${c.idPaciente})}" th:text="${c.paciente}">María González Pérez</a>
+                        </td>
+                        <td th:text="${c.psicologo}">Diego Ramos Chávez</td>
+                        <td><span th:replace="~{fragments/panel :: modalidad(${c.modalidad})}"></span></td>
+                        <td>
+                            <span class="mn-estado" th:classappend="'mn-tone--' + ${c.estadoCodigo}"
+                                  th:text="${c.estadoNombre}">Pendiente</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mn-card__footer d-flex flex-wrap align-items-center justify-content-between gap-2"
+                 th:if="${resultado.totalElementos > 0}">
+                <span th:text="|Mostrando ${resultado.desde()} - ${resultado.hasta()} de ${resultado.totalElementos} citas|">
+                    Mostrando 1 - 15 de 40 citas
+                </span>
+                <nav aria-label="Paginación de citas" th:if="${resultado.totalPaginas > 1}">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${resultado.tieneAnterior()} ? '' : 'disabled'">
+                            <a class="page-link" aria-label="Página anterior"
+                               th:href="@{/citas(fecha=${fecha}, estado=${estado}, paciente=${paciente}, pagina=${resultado.pagina - 1})}">
+                                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="n : ${resultado.paginas()}"
+                            th:classappend="${n == resultado.pagina} ? 'active'">
+                            <a class="page-link" th:href="@{/citas(fecha=${fecha}, estado=${estado}, paciente=${paciente}, pagina=${n})}"
+                               th:text="${n}" th:attr="aria-current=${n == resultado.pagina ? 'page' : null}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${resultado.tieneSiguiente()} ? '' : 'disabled'">
+                            <a class="page-link" aria-label="Página siguiente"
+                               th:href="@{/citas(fecha=${fecha}, estado=${estado}, paciente=${paciente}, pagina=${resultado.pagina + 1})}">
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
+    </main>
 </div>
 
-<th:block th:replace="~{fragments/panel :: scripts}">
-</th:block>
-
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
 </body>
-
 </html>
