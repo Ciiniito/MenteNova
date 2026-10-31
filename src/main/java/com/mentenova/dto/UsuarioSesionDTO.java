@@ -42,6 +42,14 @@ public record UsuarioSesionDTO(
         return !PACIENTE.equals(rol);
     }
 
+    public boolean puedeGestionarPacientes() {
+        return ADMINISTRADOR.equals(rol) || RECEPCIONISTA.equals(rol);
+    }
+
+    public boolean puedeConsultarPacientes() {
+        return puedeGestionarPacientes() || PSICOLOGO.equals(rol);
+    }
+
     private static String inicial(String texto) {
         return texto == null || texto.isBlank() ? "" : texto.strip().substring(0, 1).toUpperCase();
     }

@@ -53,10 +53,10 @@
                     <small class="mn-nav__pronto">Pronto</small>
                 </span>
                 <th:block th:if="${usuarioSesion.rol != 'PSICOLOGO'}">
-                    <span class="mn-nav__link disabled" aria-disabled="true">
+                    <a th:href="@{/pacientes}" class="mn-nav__link"
+                       th:classappend="${activo == 'pacientes'} ? 'active'">
                         <i class="bi bi-people" aria-hidden="true"></i><span>Pacientes</span>
-                        <small class="mn-nav__pronto">Pronto</small>
-                    </span>
+                    </a>
                     <span class="mn-nav__link disabled" aria-disabled="true">
                         <i class="bi bi-person-badge" aria-hidden="true"></i><span>Psicólogos</span>
                         <small class="mn-nav__pronto">Pronto</small>
@@ -66,7 +66,16 @@
                         <small class="mn-nav__pronto">Pronto</small>
                     </span>
                 </th:block>
+                <a th:if="${usuarioSesion.rol == 'PSICOLOGO'}" th:href="@{/pacientes}" class="mn-nav__link"
+                   th:classappend="${activo == 'pacientes'} ? 'active'">
+                    <i class="bi bi-people" aria-hidden="true"></i><span>Mis pacientes</span>
+                </a>
             </th:block>
+
+            <a th:if="${usuarioSesion != null and usuarioSesion.rol == 'PACIENTE'}" th:href="@{/mis-datos}"
+               class="mn-nav__link" th:classappend="${activo == 'mis-datos'} ? 'active'">
+                <i class="bi bi-person-vcard" aria-hidden="true"></i><span>Mis datos</span>
+            </a>
 
             <th:block th:if="${usuarioSesion != null and usuarioSesion.puedeVerReportes()}">
                 <a th:href="@{/reportes}" class="mn-nav__link"

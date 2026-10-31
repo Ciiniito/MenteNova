@@ -25,7 +25,7 @@ puedes correrlo las veces que quieras.
 | 3 | Deja a `mentenova_app` como dueño de las tablas. Hace falta si las creaste como `postgres`, por ejemplo desde pgAdmin. |
 | 4 | Crea las 15 tablas del APF2 (`mentenova_schema.sql`) si la base está vacía. |
 | 5 | Aplica los scripts nuevos de `database/cambios/`, cada uno una sola vez. |
-| 6 | Carga los datos de demostración si aún no están. |
+| 6 | Carga los datos de demostración (`reportes_datos_demo.sql`) si aún no están y luego los scripts nuevos de `database/demo/`, cada uno una sola vez. |
 
 Después levanta la aplicación y entra a `http://localhost:8080/mentenova/login`.
 
@@ -47,26 +47,45 @@ Contraseña de todos: `Demo1234!`
 | `admin@demo.mentenova.local` | Administrador |
 | `recepcion@demo.mentenova.local` | Recepcionista |
 | `psicologo1@demo.mentenova.local` … `psicologo4@demo.mentenova.local` | Psicólogo |
-| `paciente@demo.mentenova.local` | Paciente |
+| `paciente@demo.mentenova.local` | Paciente (vinculado a la ficha de María González Pérez) |
+| `pedro.salinas@demo.mentenova.local` | Paciente con cuenta aún **sin vincular** a su ficha |
 
 Los datos demo crean unas 585 citas con sus pagos, desde 90 días antes hasta 21 días después de
 la fecha en que se cargan.
 
-`src/main/resources/data.sql` no hace falta: el DDL ya inserta los roles, y el hash de su
-administrador (`admin@mentenova.local`) no es un BCrypt válido.
+### Casos de prueba de la gestión de pacientes (`demo/001_pacientes_casos_prueba.sql`)
+
+| Paciente | Para probar |
+|---|---|
+| Pedro Salinas Rojas (DNI 70000025) | Vincular una cuenta: edita la ficha y escribe `pedro.salinas@demo.mentenova.local` en "Cuenta de acceso". |
+| Lucas Paredes Soto | Paciente menor y sin documento. |
+| Valeria Mendoza Pérez (CE 001234567) | Carné de extranjería. |
+| James Carter (Pasaporte X1234567) | Pasaporte. |
+| Rosa Inés Vargas Quiroz (DNI 70000026) | Paciente inactivo: aparece con el filtro "Inactivos". |
+
+`src/main/resources/data.sql` es opcional: el DDL ya inserta los roles. Si quieres además el
+administrador `admin@mentenova.local` / `Admin1234!`, ejecútalo después del DDL:
+`psql -U mentenova_app -d mentenova -f src/main/resources/data.sql`.
 
 ## Si tu módulo necesita cambiar la base
 
-1. Crea un archivo en `database/cambios/` con un número correlativo y un nombre descriptivo, por
-   ejemplo `001_agregar_campo_x_a_cita.sql`.
+1. Crea un archivo en `database/cambios/` con el siguiente número correlativo y un nombre
+   descriptivo, por ejemplo `002_agregar_campo_x_a_cita.sql`. Si solo son datos de prueba,
+   va en `database/demo/` (por ejemplo `002_citas_para_probar_x.sql`).
 2. Escribe solo el cambio (`ALTER TABLE`, `CREATE TABLE`, `INSERT` de catálogos, etc.), **sin**
    `BEGIN`/`COMMIT`. El script lo ejecuta en una transacción y lo registra en la tabla
-   `control_cambios`; si falla, no queda nada a medias.
+   `control_cambios` (por ejemplo `cambios/002_agregar_campo_x_a_cita.sql`); si falla, no queda
+   nada a medias.
 3. No edites un script que ya subiste: para corregirlo, crea otro. El script avisa si un archivo
    ya aplicado fue modificado.
 4. Súbelo junto con tu código. Tus compañeros solo vuelven a ejecutar `actualizar_base_local.ps1`.
 
 No modifiques `mentenova_schema.sql`: es la base del APF2 y solo se aplica en una base vacía.
+
+| Script aplicado | Qué agrega |
+|---|---|
+| `cambios/001_auditoria_paciente.sql` | Registra en `auditoria` quién crea o modifica cada paciente (la ficha la muestra al Administrador). |
+| `demo/001_pacientes_casos_prueba.sql` | Los casos de prueba de pacientes descritos arriba. |
 
 ## Archivos
 
@@ -76,7 +95,8 @@ No modifiques `mentenova_schema.sql`: es la base del APF2 y solo se aplica en un
 | `mentenova_schema.sql` | DDL completo del APF2 (sección 6.2). |
 | `permisos_usuario_app.sql` | Asigna a `mentenova_app` las tablas y funciones; lo usa el script. |
 | `reportes_datos_demo.sql` | Datos de demostración: usuarios por rol, citas y pagos. |
-| `cambios/` | Cambios incrementales de la base. |
+| `cambios/` | Cambios incrementales de la estructura de la base. |
+| `demo/` | Datos de prueba incrementales (no se cargan con `-SinDatosDemo`). |
 
 ## Sin Windows o a mano
 
@@ -87,7 +107,8 @@ psql -U mentenova_app -d mentenova -f database/mentenova_schema.sql
 psql -U mentenova_app -d mentenova -f database/reportes_datos_demo.sql
 ```
 
-Después aplica, en orden, los archivos de `database/cambios/` que aún no tengas.
+Después aplica, en orden, los archivos de `database/cambios/` y luego los de `database/demo/` que
+aún no tengas.
 
 ## Problemas frecuentes
 

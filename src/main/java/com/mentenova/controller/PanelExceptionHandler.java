@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ControllerAdvice(assignableTypes = {DashboardController.class, ReporteController.class})
+@ControllerAdvice(assignableTypes = {
+        DashboardController.class, ReporteController.class, PacienteController.class, MisDatosController.class})
 public class PanelExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PanelExceptionHandler.class);

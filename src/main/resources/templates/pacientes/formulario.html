@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="es">
+<head th:replace="~{fragments/panel :: head(${idPaciente == null ? 'Nuevo paciente' : 'Editar paciente'})}"></head>
+<body class="mn-panel">
+<div class="mn-layout">
+    <aside th:replace="~{fragments/panel :: sidebar('pacientes')}"></aside>
+
+    <main class="mn-main"
+          th:with="nuevo=${idPaciente == null},
+                   titulo=${idPaciente == null ? 'Nuevo paciente' : 'Editar paciente'},
+                   subtitulo=${idPaciente == null ? 'Registra los datos administrativos del paciente.' : 'Actualiza los datos administrativos del paciente.'}">
+        <a th:href="${nuevo} ? @{/pacientes} : @{/pacientes/{id}(id=${idPaciente})}"
+           class="mn-link d-inline-flex align-items-center gap-1 mb-2">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i> Volver
+        </a>
+        <header th:replace="~{fragments/panel :: topbar(${titulo}, ${subtitulo})}"></header>
+
+        <form th:action="${nuevo} ? @{/pacientes} : @{/pacientes/{id}(id=${idPaciente})}" method="post"
+              th:object="${paciente}" class="mn-card mn-formulario" novalidate>
+            <div class="mn-card__body">
+                <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger d-flex gap-2" role="alert">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    <div>
+                        <span>Revisa los campos marcados.</span>
+                        <span class="d-block" th:each="error : ${#fields.globalErrors()}" th:text="${error}">Error general</span>
+                    </div>
+                </div>
+
+                <h2 class="mn-form-seccion">Datos personales</h2>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="nombres" class="form-label">Nombres <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="text" class="form-control" th:field="*{nombres}" th:errorclass="is-invalid"
+                               maxlength="80" required autocomplete="off"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}">Error</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="apellidos" class="form-label">Apellidos <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="text" class="form-control" th:field="*{apellidos}" th:errorclass="is-invalid"
+                               maxlength="100" required autocomplete="off"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}">Error</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
+                        <input type="date" class="form-control" th:field="*{fechaNacimiento}" th:errorclass="is-invalid"
+                               min="1900-01-01" th:max="${hoy}"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}">Error</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="tipoDocumento" class="form-label">Tipo de documento</label>
+                        <select class="form-select" th:field="*{tipoDocumento}" th:errorclass="is-invalid">
+                            <option value="">Sin documento</option>
+                            <option th:each="t : ${tiposDocumento}" th:value="${t.valor}" th:text="${t.etiqueta}">DNI</option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('tipoDocumento')}" th:errors="*{tipoDocumento}">Error</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="numeroDocumento" class="form-label">Número de documento</label>
+                        <input type="text" class="form-control" th:field="*{numeroDocumento}" th:errorclass="is-invalid"
+                               maxlength="20" autocomplete="off"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('numeroDocumento')}" th:errors="*{numeroDocumento}">Error</div>
+                        <div class="form-text">Opcional. DNI: 8 dígitos; CE y pasaporte: de 6 a 12 letras o números.</div>
+                    </div>
+                </div>
+
+                <h2 class="mn-form-seccion">Contacto</h2>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="telefono" class="form-label">Teléfono <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="tel" class="form-control" th:field="*{telefono}" th:errorclass="is-invalid"
+                               maxlength="20" required placeholder="+51 987 654 321" autocomplete="off"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}">Error</div>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="correo" class="form-label">Correo electrónico</label>
+                        <input type="email" class="form-control" th:field="*{correo}" th:errorclass="is-invalid"
+                               maxlength="254" placeholder="paciente@correo.com" autocomplete="off"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}">Error</div>
+                    </div>
+                    <div class="col-12">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" th:field="*{direccion}" th:errorclass="is-invalid"
+                               maxlength="250" autocomplete="off"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}">Error</div>
+                    </div>
+                </div>
+
+                <h2 class="mn-form-seccion">Cuenta de acceso <span class="mn-form-opcional">(opcional)</span></h2>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label for="correoCuenta" class="form-label">Correo de la cuenta del paciente</label>
+                        <input type="email" class="form-control" th:field="*{correoCuenta}" th:errorclass="is-invalid"
+                               maxlength="254" autocomplete="off"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('correoCuenta')}" th:errors="*{correoCuenta}">Error</div>
+                        <div class="form-text">
+                            Vincula la cuenta que el paciente creó con "Regístrese aquí" para que vea sus citas y sus datos.
+                            Déjalo vacío si no tiene cuenta.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mn-card__footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span><i class="bi bi-shield-check" aria-hidden="true"></i> No registres diagnósticos ni notas clínicas (RN07).</span>
+                <div class="d-flex gap-2">
+                    <a th:href="${nuevo} ? @{/pacientes} : @{/pacientes/{id}(id=${idPaciente})}" class="btn btn-light border">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2" aria-hidden="true"></i> Guardar paciente
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body>
+</html>
