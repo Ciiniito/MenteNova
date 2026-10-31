@@ -33,7 +33,7 @@ Después levanta la aplicación y entra a `http://localhost:8080/mentenova/login
 
 | Opción | Uso |
 |---|---|
-| `-SinDatosDemo` | No carga los datos de demostración. |
+| `-SinDatosDemo` | No carga los datos de demostración. La base queda sin usuarios ni especialidades: ejecuta `data.sql` (ver más abajo) para tener el administrador inicial y crea las especialidades en `/especialidades`. |
 | `-Recrear` | Borra y vuelve a crear la base (pide confirmación). Sirve para regenerar los datos demo con fechas actuales o para empezar de cero. |
 | `-ClavePostgres <clave>` | Pasa la clave de `postgres` sin que la pida. |
 | `-Puerto`, `-BaseDatos`, `-UsuarioApp`, `-ClaveApp` | Si tu instalación usa otros valores. Por defecto: `5432`, `mentenova`, `mentenova_app`, `mentenova_app`. |
@@ -53,6 +53,20 @@ Contraseña de todos: `Demo1234!`
 Los datos demo crean unas 585 citas con sus pagos, desde 90 días antes hasta 21 días después de
 la fecha en que se cargan.
 
+### Psicólogos, especialidades y disponibilidad
+
+Los módulos de psicólogos, especialidades, disponibilidad y agenda usan tablas que ya están en
+`mentenova_schema.sql`; no necesitan scripts adicionales. Los datos demo traen 5 especialidades y
+4 psicólogos con horarios de lunes a sábado: de 09:00 a 14:00 presencial y de 15:00 a 20:00
+virtual. No hay excepciones cargadas.
+
+| `id_psicologo` | Cuenta | Psicólogo |
+|---|---|---|
+| 1 | `psicologo4@demo.mentenova.local` | Diego Ramos Chávez |
+| 2 | `psicologo3@demo.mentenova.local` | Carmen Salas Paredes |
+| 3 | `psicologo2@demo.mentenova.local` | Andrés Torres Vega |
+| 4 | `psicologo1@demo.mentenova.local` | Laura Méndez Ríos |
+
 ### Casos de prueba de la gestión de pacientes (`demo/001_pacientes_casos_prueba.sql`)
 
 | Paciente | Para probar |
@@ -63,8 +77,9 @@ la fecha en que se cargan.
 | James Carter (Pasaporte X1234567) | Pasaporte. |
 | Rosa Inés Vargas Quiroz (DNI 70000026) | Paciente inactivo: aparece con el filtro "Inactivos". |
 
-`src/main/resources/data.sql` es opcional: el DDL ya inserta los roles. Si quieres además el
-administrador `admin@mentenova.local` / `Admin1234!`, ejecútalo después del DDL:
+`src/main/resources/data.sql` es opcional con los datos demo: el DDL ya inserta los roles. Es
+necesario si usaste `-SinDatosDemo`, porque crea el administrador `admin@mentenova.local` /
+`Admin1234!`. Ejecútalo después del DDL:
 `psql -U mentenova_app -d mentenova -f src/main/resources/data.sql`.
 
 ## Si tu módulo necesita cambiar la base

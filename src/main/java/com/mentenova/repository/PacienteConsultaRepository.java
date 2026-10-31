@@ -91,7 +91,7 @@ public class PacienteConsultaRepository {
     }
 
     public Optional<Long> idPsicologoDeUsuario(Long idUsuario) {
-        return jdbc.queryForList("SELECT id_psicologo FROM psicologo WHERE id_usuario = :idUsuario",
+        return jdbc.queryForList("SELECT id_psicologo FROM psicologo WHERE id_usuario = :idUsuario AND activo",
                         new MapSqlParameterSource("idUsuario", idUsuario), Long.class)
                 .stream().findFirst();
     }

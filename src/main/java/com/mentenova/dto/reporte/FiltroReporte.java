@@ -7,6 +7,12 @@ import java.time.YearMonth;
 
 public class FiltroReporte {
 
+    public static final LocalDate FECHA_MINIMA = LocalDate.of(2000, 1, 1);
+
+    public static final LocalDate FECHA_MAXIMA = LocalDate.of(2099, 12, 31);
+
+    private static final int ANIOS_MAXIMOS = 5;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate desde;
 
@@ -36,7 +42,20 @@ public class FiltroReporte {
         this.idPsicologo = idPsicologo;
     }
 
+    public static boolean admite(YearMonth mes) {
+        return !mes.atDay(1).isBefore(FECHA_MINIMA) && !mes.atEndOfMonth().isAfter(FECHA_MAXIMA);
+    }
+
+    private static LocalDate acotar(LocalDate fecha) {
+        if (fecha == null || fecha.isBefore(FECHA_MINIMA)) {
+            return fecha == null ? null : FECHA_MINIMA;
+        }
+        return fecha.isAfter(FECHA_MAXIMA) ? FECHA_MAXIMA : fecha;
+    }
+
     public void completarPeriodo(LocalDate desdePorDefecto, LocalDate hastaPorDefecto) {
+        desde = acotar(desde);
+        hasta = acotar(hasta);
         if (desde == null) {
             desde = hasta != null && hasta.isBefore(desdePorDefecto) ? hasta.withDayOfMonth(1) : desdePorDefecto;
         }
@@ -47,6 +66,9 @@ public class FiltroReporte {
             LocalDate fecha = desde;
             desde = hasta;
             hasta = fecha;
+        }
+        if (desde.plusYears(ANIOS_MAXIMOS).isBefore(hasta)) {
+            desde = hasta.minusYears(ANIOS_MAXIMOS).plusDays(1);
         }
     }
 

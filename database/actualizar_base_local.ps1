@@ -243,6 +243,11 @@ try {
 
     Write-Paso 'Resumen'
     Write-Ok (Get-ValorApp "SELECT (SELECT count(*) FROM usuario) || ' usuarios, ' || (SELECT count(*) FROM paciente) || ' pacientes, ' || (SELECT count(*) FROM cita) || ' citas, ' || (SELECT count(*) FROM pago) || ' pagos, ' || (SELECT count(*) FROM control_cambios) || ' scripts registrados'")
+    Write-Ok (Get-ValorApp "SELECT (SELECT count(*) FROM psicologo) || ' psicologos, ' || (SELECT count(*) FROM especialidad) || ' especialidades, ' || (SELECT count(*) FROM disponibilidad) || ' franjas de disponibilidad, ' || (SELECT count(*) FROM excepcion_disponibilidad) || ' excepciones'")
+    if ([int](Get-ValorApp 'SELECT count(*) FROM usuario') -eq 0) {
+        Write-Aviso 'La base no tiene usuarios. Para crear el administrador inicial ejecuta:'
+        Write-Aviso "  psql -h $Servidor -p $Puerto -U $UsuarioApp -d $BaseDatos -f src\main\resources\data.sql"
+    }
     Write-Host ''
     Write-Host 'Listo. Inicia la aplicacion y entra a http://localhost:8080/mentenova/login' -ForegroundColor Green
     if (-not $SinDatosDemo) {
