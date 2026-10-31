@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/panel :: head('Especialidad')}"></head>
+<body class="mn-panel mn-psicologos mn-planificacion">
+<div class="mn-layout"><aside th:replace="~{fragments/panel :: sidebar('especialidades')}"></aside>
+<main class="mn-main psi-main">
+<div class="psi-page-top"><header th:replace="~{fragments/panel :: topbar('Especialidad', 'Completa los datos del área de atención.')}"></header><span class="psi-context"><span class="psi-dot"></span> Equipo clínico</span></div>
+<div th:if="${exito}" class="psi-alert psi-alert--success" role="status" th:text="${exito}"></div>
+<div th:if="${error}" class="psi-alert psi-alert--error" role="alert" th:text="${error}"></div>
+
+<a th:href="@{/especialidades}" class="psi-back"><i class="bi bi-arrow-left" aria-hidden="true"></i> <span>Volver a especialidades</span></a>
+<form th:action="@{/especialidades/guardar}" th:object="${especialidadForm}" method="post" class="psi-form plan-short-form">
+<input th:if="${especialidadId != null}" type="hidden" name="id" th:value="${especialidadId}">
+<div class="psi-form__intro"><h3 th:text="${especialidadId == null} ? 'Nueva especialidad' : 'Editar especialidad'"></h3></div>
+<div class="psi-form-section">
+<div th:if="${#fields.hasAnyErrors()}" class="psi-alert psi-alert--error" role="alert"><ul><li th:each="e : ${#fields.allErrors()}" th:text="${e}"></li></ul></div>
+<div class="psi-field"><label for="nombre">Nombre</label><input th:field="*{nombre}" maxlength="100" required placeholder="Ej. Psicología clínica"></div>
+<div class="psi-field"><label for="descripcion">Descripción (opcional)</label><textarea th:field="*{descripcion}" maxlength="250" rows="3"></textarea></div>
+<div class="psi-field"><label for="activo">Estado</label><select th:field="*{activo}" required><option value="true">Activa</option><option value="false">Inactiva</option></select><small class="psi-field-help">Una especialidad inactiva conserva sus asignaciones anteriores.</small></div>
+</div><div class="psi-form-actions"><a th:href="@{/especialidades}" class="psi-button psi-button--secondary"><i class="bi bi-x-lg" aria-hidden="true"></i> <span>Cancelar</span></a><button class="psi-button psi-button--primary" type="submit"><i class="bi bi-check2-circle" aria-hidden="true"></i> <span>Guardar especialidad</span></button></div></form>
+<footer class="psi-page-footer">MenteNova · Centro Psicológico</footer>
+</main></div><th:block th:replace="~{fragments/panel :: scripts}"></th:block>
+</body></html>
